@@ -4,12 +4,13 @@
 
 所有命令都在仓库根目录下用 PowerShell 7 运行。
 
-## 版本对应（dsh-v0.2.0-rc.2-win7.1）
+## 版本对应（dsh-v0.2.1-rc.2-win7.1）
 
 | 组件 | 版本 | 固定在哪里 |
 |---|---|---|
-| DSH | 上游 tag `dsh-v0.2.0-rc.2` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.0-rc.2-win7` 上有 8 个提交，tag 是 `dsh-v0.2.0-rc.2-win7.1` |
-| Electron | 44.2.0：Chromium 152.0.7977.76（`src@0d89dfa2`），electron_node `71b8b174`（v24.20.0） | `scripts/electron.gclient`、`scripts/electron-sync.cmd`；gn 参数在 `scripts/electron-release.gn` |
+| DSH | 上游 tag `dsh-v0.2.1-rc.2` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.1-rc.2-win7` 上有 8 个提交，tag 是 `dsh-v0.2.1-rc.2-win7.1` |
+| Electron | 44.2.0：Chromium 152.0.7977.76（`src@0d89dfa2`），electron_node `71b8b174`（v24.20.0）。DSH 0.2.1 声明 `^44.7.0`（Chromium 152.0.7977.130），社区补丁目前只到 44.2.0，fork 里钉在 44.2.0 | `scripts/electron.gclient`、`scripts/electron-sync.cmd`；gn 参数在 `scripts/electron-release.gn`；版本钉在主仓库 `apps/desktop/package.json` |
+| pnpm | 11.28.5（随自带运行时分发） | 主仓库根目录 `package.json` 的 `packageManager` |
 | Electron Win7 补丁 | [e3kskoy7wqk/Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) `1086a0a7`（目录 `v44.2.0`），外加 `win7-fixes/electron` | `scripts/apply-electron-win7-patches.ps1` |
 | 自带 Node | 24.21.0，外加 `win7-fixes/node/v24.21.0` 的 7 个补丁 | 主仓库 `scripts/primary-runtime/lock.json` 里的 `nodeSha256` |
 | 自带 Python | PythonVista 3.12.14 NuGet 包 | `lock.json` 里的 `pythonNupkg` |
@@ -62,8 +63,8 @@
    - 把 `out\ripgrep-target\x86_64-win7-windows-msvc\release-lto\rg.exe` 拷成 `out\rg-15.0.0-win7-x64.exe`。
 4. **winpty：** 下载 [winpty 0.4.3](https://github.com/rprichard/winpty/releases/tag/0.4.3) 的 `winpty-0.4.3-msvc2015.zip`（sha256 `35a48ece…`，完整值见 `scripts/build-pty-winpty.ps1`），解压到 `out\winpty\extract\`。
 5. **PowerShell：** 下载 [PowerShell 7.2.24](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) 的 `PowerShell-7.2.24-win-x64.zip`，放到 `out\pwsh\`。旁边建一个同名 `.sha256` 文件，里面只写哈希值。
-6. **参考 node_modules：** 用官方 Node 在 `out\host-web\` 里运行 `npm install @deepseek-ai/dsh@0.2.0-rc.2`。覆盖层以这些文件为原件，记下它们的 sha256，并读出要固定的版本。
-7. **覆盖层：** 运行 `scripts\build-win7-overlay.ps1`，生成 `out\win7-runtime-overlay\`。兼容层 DLL 会在这一步编译。
+6. **参考 node_modules：** 用官方 Node 在 `out\host-web-0.2.1-rc.2\` 里运行 `npm install --ignore-scripts @deepseek-ai/dsh@0.2.1-rc.2`。覆盖层以这些文件为原件，记下它们的 sha256，并读出要固定的版本。
+7. **覆盖层：** 运行 `scripts\build-win7-overlay.ps1 -Reference out\host-web-0.2.1-rc.2\node_modules`，生成 `out\win7-runtime-overlay\`。兼容层 DLL 会在这一步编译。
 8. **打包：**
    - 先建 `deepseek-harness\apps\desktop\.env.windows`：
      ```
@@ -75,6 +76,7 @@
      更新地址指向不存在的 `policy.invalid`，所以不会自动更新。
    - 再运行 `scripts\package-desktop-win7.ps1`（加 `--check` 只检查配置）。
    - 产物在 `deepseek-harness\apps\desktop\.desktop-build\targets\win-x64\unsigned-artifacts\`。
+   - 打包最后的自检（`smoke-packaged-runtime`）偶尔会超时：离线安装插件那一步只给 120 秒，而新生成的程序第一次运行会比较慢。这时安装包其实已经生成，在 `deepseek-harness\apps\desktop\` 下单独重跑 `corepack pnpm exec tsx scripts/smoke-packaged-runtime.ts --unsigned`，通过即可。
 
 ### 检查与测试
 
@@ -98,21 +100,24 @@
 
 ## 适配 DSH 新版本
 
-假设上游新 tag 是 `dsh-vX`：
+假设上游新 tag 是 `dsh-vX`，上一次适配的是 `dsh-v0.2.1-rc.2`：
 
 1. **迁移源码改动**
    ```powershell
    git -C deepseek-harness fetch origin --tags
    git -C deepseek-harness switch -c dsh-vX-win7 dsh-vX
-   git -C deepseek-harness cherry-pick dsh-v0.2.0-rc.2..dsh-v0.2.0-rc.2-win7
+   git -C deepseek-harness cherry-pick dsh-v0.2.1-rc.2..dsh-v0.2.1-rc.2-win7
    ```
-   逐个解决冲突。8 个提交各管一件事，提交信息写了原因，可以据此判断上游是否已经换了做法。
+   - 逐个解决冲突。8 个提交各管一件事，提交信息写了原因，可以据此判断上游是否已经换了做法。
+   - 冲突解决完以后，先在主仓库里 `corepack pnpm install --frozen-lockfile`，再继续 cherry-pick。否则 pre-commit 钩子可能因为 `node_modules` 还是旧版本而报错（比如 "Provider metadata is stale"）。
+   - 自动合并的地方也要逐个核对。0.2.1 时上游重构过 Node 下载和打包脚本，Win7 的改动要按新结构重新接入。
 2. **对照依赖版本，有变化的部分重做**
    - **Electron：** `apps/desktop/package.json` 不再是 44.2.0 时，要换成 Electron-for-windows-7 对应版本的补丁，重新编译。必要时更新 `win7-fixes/electron` 和 `electron-release.gn`。
    - **Node：** `scripts/primary-runtime/lock.json` 的 Node 版本变了时，在新版本上重新打 `win7-fixes/node` 的补丁，改好后导出到 `win7-fixes/node/<新版本>/`，重新编译并更新 `nodeSha256`。
    - **Python：** 版本变了时，换成 PythonVista 对应版本，更新 `pythonNupkg`。
    - **pnpm：** 不要升级到 pnpm 12，它的原生程序在 Win7 上启动失败。
-   - **原生包：** 重建 `out\host-web`，再运行 `build-win7-overlay.ps1`。原件变了时，sha256 检查会让打包直接失败，不会悄悄换错文件；这时按新文件重新生成兼容层的导出表，并复查缺哪些函数。
+   - **原生包：** 按新版本建参考目录 `out\host-web-<版本>`，和覆盖层清单里记录的原件 sha256 逐个比对。都相同时，现有覆盖层可以原样复用（0.2.1 就是这样）；有变化时再用 `-Reference` 指向新目录运行 `build-win7-overlay.ps1`，按新文件重新生成兼容层的导出表，并复查缺哪些函数。打包时也会做同样的 sha256 检查，原件对不上就直接失败，不会悄悄换错文件。
+   - **上游新代码：** 搜一下新出现的 `powershell.exe` 调用（Win7 上是 2.0）、无条件调用 `node-addon-require-builtin` 的地方，以及新增的 koffi 绑定和安装程序原生代码。
 3. **出包并验证：** 打包，跑静态导入检查，在虚拟机里测试，方法同上。
 4. **发布**
    - 在 fork 上打 `dsh-vX-win7.1` 并推送分支和 tag。

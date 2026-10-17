@@ -6,9 +6,10 @@
 
 | | |
 |---|---|
-| 适配的 DSH 版本 | 0.2.0-rc.2（上游 tag `dsh-v0.2.0-rc.2`） |
-| 当前发布 | [`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
-| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.0-rc.2-win7) 的 `dsh-v0.2.0-rc.2-win7` 分支 |
+| 适配的 DSH 版本 | 0.2.1-rc.2（上游 tag `dsh-v0.2.1-rc.2`） |
+| 当前发布 | [`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1) |
+| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.1-rc.2-win7) 的 `dsh-v0.2.1-rc.2-win7` 分支 |
+| 旧版本 | 0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
 
 ## 安装
 
@@ -62,7 +63,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 ### 安装 DSH
 
-1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.0-rc.2-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
+1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.1-rc.2-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
 2. 运行它。安装包没有签名，Win7 会提示"无法验证发布者"，点"运行"，然后点"立即安装"。
 3. 装好后开始菜单里会出现 DeepSeek Harness。
 
@@ -98,7 +99,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 | 组件 | 上游的问题 | 适配方式 |
 |---|---|---|
-| Electron | 官方 44.x 只支持 Win10+ | 用社区补丁 [Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) 自己编译 Electron 44.2.0，再加上 [`win7-fixes/electron`](win7-fixes/electron) 里的修复 |
+| Electron | 官方 44.x 只支持 Win10+ | 用社区补丁 [Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) 自己编译 Electron 44.2.0，再加上 [`win7-fixes/electron`](win7-fixes/electron) 里的修复。DSH 0.2.1 声明的是 `^44.7.0`，社区补丁目前只到 44.2.0，所以钉在 44.2.0 |
 | 自带 Node.js | 官方 24.x 不能在 Win7 上启动 | 用 Node 24.21.0 源码加 [`win7-fixes/node`](win7-fixes/node) 的 7 个补丁编译 |
 | 自带 Python | python-build-standalone 依赖 Win8+ API | 换成 [PythonVista](https://github.com/adang1345/PythonVista) 3.12.14 |
 | PowerShell | Win7 自带的 2.0 在沙箱里启动不了 | 自带 PowerShell 7.2.24 |
