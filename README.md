@@ -114,7 +114,6 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 - `shim/`：Win7 兼容层源码。
 - `win7-fixes/`：Electron 和 Node 的补丁。
 - [`docs/porting.md`](docs/porting.md)：从零构建，以及适配 DSH 新版本的步骤。
-- [`HANDOFF.md`](HANDOFF.md)：开发记录，包括每个问题的排查过程和决定。
 - [`CLAUDE.md`](CLAUDE.md)：给 Claude Code 的项目说明。
 
 ## 许可证

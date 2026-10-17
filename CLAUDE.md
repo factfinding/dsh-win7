@@ -4,16 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 这是什么
 
-个人实验：让 DeepSeek Harness 桌面版（Electron 应用）在 Windows 7 x64 上运行，不提交上游。所有代码都 clone 到本目录下，包括主仓库（`deepseek-harness/`）。**不要使用 `D:\Documents\2026\deepseek-harness` 那份旧 checkout。**
+个人实验：让 DeepSeek Harness 桌面版（Electron 应用）在 Windows 7 x64 上运行，不提交上游。所有代码都 clone 到本目录下，包括主仓库（`deepseek-harness/`）。**不要使用上一级目录里那份旧的 `deepseek-harness` checkout（`..\deepseek-harness`）。**
 
 本目录是公开仓库 `dsh-win7`（`github.com/factfinding/dsh-win7`），但只跟踪自己的文件。`.gitignore` 是白名单，只放行：
 - `scripts/`、`shim/`、`win7-fixes/`、`docs/`；
-- README、LICENSE、本文件、HANDOFF.md；
+- README、LICENSE、本文件；
 - `deepseek-harness` 子模块，指向 fork 的适配分支。
 
 第三方 clone、工具链、`out/` 都不进仓库，新增要公开的顶层文件或目录时要在 `.gitignore` 里放行。仓库结构、版本对应、构建和适配新版本的步骤见 [docs/porting.md](docs/porting.md)。Release 只上传安装包，系统更新和运行库在 README 里写清楚，不再分发。
 
-**进度、已做的决定和待决问题都以 [HANDOFF.md](HANDOFF.md) 为准，开工前先读完。** 阶段状态、阻碍清单或待决问题有变化时更新 HANDOFF.md，不要写进本文件。
+**进度、已做的决定和待决问题都以 HANDOFF.md 为准，开工前先读完。** 阶段状态、阻碍清单或待决问题有变化时更新 HANDOFF.md，不要写进本文件。
+
+HANDOFF.md 是本机的开发记录，不进仓库（2026-10-17 用户决定），因为里面有本机路径、虚拟机的网络和账号等环境信息。公开文件（README、`docs/`、脚本注释、提交信息）不要链接或引用它；要公开的结论写进这些文件本身。本文件也会公开，写本机路径时用相对路径，不写邮箱、密码这类个人信息。
 
 ## 目录约定
 
@@ -55,14 +57,14 @@ cmd /c scripts\build-node.cmd *> out\build-node.log
 cmd /c scripts\build-node.cmd noprojgen *> out\build-node.log
 
 # 主仓库本机环境（在 deepseek-harness\ 下）：官方 Node 24 + 仓库锁定的 pnpm（corepack）
-$env:PATH = "D:\Documents\2026\dsh-win7\tools\node-v24.21.0-win-x64;" + $env:PATH
+$env:PATH = (Resolve-Path ..\tools\node-v24.21.0-win-x64).Path + ';' + $env:PATH
 $env:COREPACK_ENABLE_DOWNLOAD_PROMPT = '0'
 $env:ELECTRON_SKIP_BINARY_DOWNLOAD = '1'   # 官方 Electron 在 Win7 上不能用，本机开发也用不到
 corepack pnpm install --frozen-lockfile
 
-# 主仓库 Windows 打包（在 deepseek-harness\ 下）。需先建 apps/desktop/.env.windows，见 HANDOFF.md
+# 主仓库 Windows 打包（在 deepseek-harness\ 下）。需先建 apps/desktop/.env.windows，见 docs/porting.md
 # 必须指向 Win7 版 node zip，否则 lock.json 的哈希对不上，打包会失败
-$env:DSH_PRIMARY_RUNTIME_NODE_ARCHIVE = 'D:\Documents\2026\dsh-win7\out\node-v24.21.0-win-x64.zip'
+$env:DSH_PRIMARY_RUNTIME_NODE_ARCHIVE = (Resolve-Path ..\out\node-v24.21.0-win-x64.zip).Path
 pnpm run package:desktop:win:x64:unsigned        # 加 --check 只检查配置
 ```
 
@@ -74,7 +76,7 @@ pnpm run package:desktop:win:x64:unsigned        # 加 --check 只检查配置
 
 ```powershell
 $vmrun = "${env:ProgramFiles(x86)}\VMware\VMware Workstation\vmrun.exe"
-$vmx = 'D:\Documents\Virtual Machines\Windows 7 x64\Windows 7 x64.vmx'
+$vmx = '<虚拟机的 .vmx 路径，见 HANDOFF.md>'
 $cred = @('-gu','test','-gp','<密码>')
 & $vmrun -T ws @cred copyFileFromHostToGuest $vmx <本机文件> 'C:\dsh-test\<文件>'
 # runProgramInGuest 不回传输出：在 guest 里重定向到文件，再拷回本机

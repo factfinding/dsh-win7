@@ -1,4 +1,4 @@
-// Smoke test for a Windows 7 Node.js build (HANDOFF.md, Phase 1 step 7).
+// Smoke test for a Windows 7 Node.js build.
 // Usage: node win7-smoke.js   Prints one line per check; exits 1 if any fail.
 'use strict';
 const os = require('os');

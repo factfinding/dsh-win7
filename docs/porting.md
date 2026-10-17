@@ -1,9 +1,6 @@
 # 构建与适配新版本
 
-本文写给要自己构建 Win7 版、或者把适配移植到 DSH 新版本的人。
-
-- 每个问题的来龙去脉和已做的决定，见 [HANDOFF.md](../HANDOFF.md)。
-- 目录约定和常用命令，见 [CLAUDE.md](../CLAUDE.md)。
+本文写给要自己构建 Win7 版、或者把适配移植到 DSH 新版本的人。目录约定和常用命令见 [CLAUDE.md](../CLAUDE.md)；每项改动的原因写在对应的提交信息和代码注释里。
 
 所有命令都在仓库根目录下用 PowerShell 7 运行。
 
@@ -92,7 +89,7 @@
   目前只允许出现两项：ConPTY 组件（Win7 上不用）和 reflink（加载失败后会自动改用复制）。
 - **虚拟机测试：**
   - 至少用一台只装了必需更新的全新 Win7 SP1。
-  - 分别从开始菜单和从安装程序结束页的"运行"启动 DSH：两种方式下进程所在的 Job 不同，见 HANDOFF.md。
+  - 分别从开始菜单和从安装程序结束页的"运行"启动 DSH。从结束页启动时，DSH 会继承安装程序所在的 Job：Win7 的程序兼容性助手建的，只允许显式脱离。在这种情况下，命令进程要先脱离它才能加入自己的 Job，见 fork 里 `fix(windows): leave the creator's Job…` 那个提交。
   - 测试脚本：
     - `scripts/win7-smoke.js`：Node 本身；
     - `scripts/win7-native-test.js`：原生模块；

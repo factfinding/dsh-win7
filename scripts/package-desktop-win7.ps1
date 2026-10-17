@@ -1,5 +1,5 @@
 # Packages the DeepSeek Harness desktop app for Windows 7 x64 (unsigned) from deepseek-harness\.
-# Inputs, all built in this directory (see HANDOFF.md):
+# Inputs, all built in this directory (see docs/porting.md):
 #   out\node-v24.21.0-win-x64.zip            Win7 node.exe for the primary runtime (scripts\build-node.cmd)
 #   out\win7-runtime-overlay\                rg, libvips, LibreOffice Kit, winpty + version pins (scripts\build-win7-overlay.ps1)
 #   out\pwsh\PowerShell-7.2.24-win-x64.zip   PowerShell 7.2 for the Host PATH on Win7, with its .sha256
