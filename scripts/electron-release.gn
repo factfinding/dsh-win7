@@ -1,0 +1,33 @@
+# gn args for the Electron v44.2.0 Win7 build; scripts\electron-build.cmd copies this to e\src\out\Release\args.gn.
+# A non-official Release, not Electron's release.gn: official builds turn on ThinLTO and PGO, and linking
+# electron.exe with ThinLTO needs far more than this machine's 23 GB of RAM. It also relinks quickly when
+# Win7 fixes need a rebuild. Everything Electron sets for all builds still comes from all.gn.
+import("//electron/build/args/all.gn")
+is_debug = false
+is_official_build = false
+is_component_build = false
+dcheck_always_on = false
+
+# Chromium's clang plugin checks raw_ptr/raw_ref fields only in non-official builds (build/config/clang/clang.gni).
+# The Win7 patches were made for official builds and restore old code with raw pointer fields, for example
+# ConditionVarImpl* in base/synchronization/condition_variable.h, which these checks reject. Off, as in official
+# builds; the checks do not change generated code.
+enable_check_raw_ptr_fields = false
+enable_check_raw_ref_fields = false
+
+# electron/BUILD.gn otherwise reads the version from git and requires electron/.git/packed-refs, which the
+# --no-history checkout does not have.
+override_electron_version = "44.2.0"
+
+# ffmpeg.dll stays separate, as in the official electron-v44.2.0-win32-x64.zip.
+is_component_ffmpeg = true
+
+# Line tables only, so a crash on Win7 can still be symbolized; Blink, the largest part, gets none.
+symbol_level = 1
+blink_symbol_level = 0
+
+# treat_warnings_as_errors = false comes from all.gn: the Win7 patch
+# electron\chore_drop_support_for_Windows_7__8__8.1_(#36427).diff adds it there.
+
+# At most two links at once: each large link takes several GB while compiles are still running.
+concurrent_links = 2

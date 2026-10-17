@@ -1,0 +1,15 @@
+# dsh-win7 tracks only its own files. Third-party checkouts (node/, ripgrep/, patches/, e/), toolchains
+# (depot_tools/, tools/), build output (out/) and local editor settings stay untracked.
+/*
+!/.gitignore
+!/.gitattributes
+!/.gitmodules
+!/LICENSE
+!/README.md
+!/CLAUDE.md
+!/HANDOFF.md
+!/docs/
+!/scripts/
+!/shim/
+!/win7-fixes/
+!/deepseek-harness

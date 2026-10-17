@@ -1,0 +1,13 @@
+diff --git a/unofficial.gni b/unofficial.gni
+--- a/unofficial.gni
++++ b/unofficial.gni
+@@ -226,6 +226,8 @@
+     ] + gypi_values.node_sources
+
+     if (is_win) {
+-      libs = [ "psapi.lib" ]
++      # [win7] src/crypto/crypto_context.cc calls crypt32 directly. Upstream resolves it through onecore.lib from
++      # //base, which the Win7 patches drop because it imports API sets that Windows 7 does not have.
++      libs = [ "psapi.lib", "crypt32.lib" ]
+     }
+     if (is_mac) {

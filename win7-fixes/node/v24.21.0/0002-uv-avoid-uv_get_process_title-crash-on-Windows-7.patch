@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: factfinding <970308389@qq.com>
+Date: Fri, 16 Oct 2026 14:59:45 +0800
+Subject: [PATCH 2/7] uv: avoid uv_get_process_title crash on Windows 7
+
+Source: e3kskoy7wqk/Electron-for-windows-7@1086a0a v44.2.0/third_party/electron_node/fix_crash_uv_get_process_title_on_windows_7.diff
+---
+ deps/uv/src/win/util.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/deps/uv/src/win/util.c b/deps/uv/src/win/util.c
+index 6f41ba3a..2c43e7c8 100644
+--- a/deps/uv/src/win/util.c
++++ b/deps/uv/src/win/util.c
+@@ -419,6 +419,11 @@ int uv_get_process_title(char* buffer, size_t size) {
+     }
+   }
+ 
++    if (process_title == NULL) {
++      LeaveCriticalSection(&process_title_lock);
++        return UV_ENOBUFS;
++    }
++
+   assert(process_title);
+   len = strlen(process_title) + 1;
+ 

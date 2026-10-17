@@ -1,0 +1,8 @@
+{
+  "name": "@dsh-win7/pty-winpty",
+  "version": "0.1.0",
+  "private": true,
+  "description": "node-pty-compatible spawn() over winpty for Windows 7 (no ConPTY)",
+  "main": "index.js",
+  "license": "MIT"
+}

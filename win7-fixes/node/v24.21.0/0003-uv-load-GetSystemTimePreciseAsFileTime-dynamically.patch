@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: factfinding <970308389@qq.com>
+Date: Fri, 16 Oct 2026 14:59:46 +0800
+Subject: [PATCH 3/7] uv: load GetSystemTimePreciseAsFileTime dynamically
+
+Falls back to GetSystemTimeAsFileTime on Windows 7. Source: e3kskoy7wqk/Electron-for-windows-7@1086a0a v44.2.0/third_party/electron_node/FR_add_real-time_clock_version_of_uv_hrtime()_#1674.diff
+---
+ deps/uv/src/win/util.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/deps/uv/src/win/util.c b/deps/uv/src/win/util.c
+index 2c43e7c8..4e2194f6 100644
+--- a/deps/uv/src/win/util.c
++++ b/deps/uv/src/win/util.c
+@@ -439,6 +439,7 @@ int uv_get_process_title(char* buffer, size_t size) {
+ }
+ 
+ 
++typedef VOID(WINAPI* FnGetSystemTimePreciseAsFileTime)(LPFILETIME);
+ /* https://github.com/libuv/libuv/issues/1674 */
+ int uv_clock_gettime(uv_clock_id clock_id, uv_timespec64_t* ts) {
+   FILETIME ft;
+@@ -447,6 +448,16 @@ int uv_clock_gettime(uv_clock_id clock_id, uv_timespec64_t* ts) {
+   if (ts == NULL)
+     return UV_EFAULT;
+ 
++  FnGetSystemTimePreciseAsFileTime precise_time_function = NULL;
++  HMODULE module = GetModuleHandleW(L"kernel32.dll");
++  if (module != NULL) {
++    precise_time_function = (FnGetSystemTimePreciseAsFileTime)GetProcAddress(
++        module, "GetSystemTimePreciseAsFileTime");
++  }
++
++  if (precise_time_function == NULL) {
++    precise_time_function = GetSystemTimeAsFileTime;
++  }
+   switch (clock_id) {
+     case UV_CLOCK_MONOTONIC:
+       uv__once_init();
+@@ -455,7 +466,7 @@ int uv_clock_gettime(uv_clock_id clock_id, uv_timespec64_t* ts) {
+       ts->tv_nsec = t % 1000000000;
+       return 0;
+     case UV_CLOCK_REALTIME:
+-      GetSystemTimePreciseAsFileTime(&ft);
++      precise_time_function(&ft);
+       /* In 100-nanosecond increments from 1601-01-01 UTC because why not? */
+       t = (int64_t) ft.dwHighDateTime << 32 | ft.dwLowDateTime;
+       /* Convert to UNIX epoch, 1970-01-01. Still in 100 ns increments. */

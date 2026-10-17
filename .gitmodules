@@ -1,0 +1,4 @@
+[submodule "deepseek-harness"]
+	path = deepseek-harness
+	url = https://github.com/factfinding/deepseek-harness
+	branch = dsh-v0.2.0-rc.2-win7

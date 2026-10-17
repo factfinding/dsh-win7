@@ -1,0 +1,25 @@
+LIBRARY dshw7
+EXPORTS
+  ; api-ms-win-core-synch-l1-2-0.dll entries missing on Windows 7 (implemented in dshw7.c)
+  WaitOnAddress = DshWaitOnAddress
+  WakeByAddressSingle = DshWakeByAddressSingle
+  WakeByAddressAll = DshWakeByAddressAll
+  ; bcryptprimitives.dll entry missing on Windows 7 (implemented in dshw7.c)
+  ProcessPrng = DshProcessPrng
+  ; api-ms-win-core-synch-l1-2-0.dll entries that Windows 7's kernel32 already exports
+  InitOnceBeginInitialize = kernel32.InitOnceBeginInitialize
+  InitOnceComplete = kernel32.InitOnceComplete
+  InitOnceExecuteOnce = kernel32.InitOnceExecuteOnce
+  InitOnceInitialize = kernel32.InitOnceInitialize
+  InitializeConditionVariable = kernel32.InitializeConditionVariable
+  SleepConditionVariableCS = kernel32.SleepConditionVariableCS
+  SleepConditionVariableSRW = kernel32.SleepConditionVariableSRW
+  WakeAllConditionVariable = kernel32.WakeAllConditionVariable
+  WakeConditionVariable = kernel32.WakeConditionVariable
+  InitializeSRWLock = kernel32.InitializeSRWLock
+  AcquireSRWLockExclusive = kernel32.AcquireSRWLockExclusive
+  AcquireSRWLockShared = kernel32.AcquireSRWLockShared
+  ReleaseSRWLockExclusive = kernel32.ReleaseSRWLockExclusive
+  ReleaseSRWLockShared = kernel32.ReleaseSRWLockShared
+  TryAcquireSRWLockExclusive = kernel32.TryAcquireSRWLockExclusive
+  TryAcquireSRWLockShared = kernel32.TryAcquireSRWLockShared

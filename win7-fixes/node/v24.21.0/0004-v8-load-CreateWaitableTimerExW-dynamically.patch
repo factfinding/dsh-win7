@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: factfinding <970308389@qq.com>
+Date: Fri, 16 Oct 2026 14:59:46 +0800
+Subject: [PATCH 4/7] v8: load CreateWaitableTimerExW dynamically
+
+Source: e3kskoy7wqk/Electron-for-windows-7@1086a0a v44.2.0/chromium/c19d5d673f4f69de535a9c524e720acaa6773e75.diff
+---
+ deps/v8/src/base/platform/platform-win32.cc | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/deps/v8/src/base/platform/platform-win32.cc b/deps/v8/src/base/platform/platform-win32.cc
+index 5951b082..58f9e307 100644
+--- a/deps/v8/src/base/platform/platform-win32.cc
++++ b/deps/v8/src/base/platform/platform-win32.cc
+@@ -1211,8 +1211,20 @@ void PreciseSleepTimer::TryInit() {
+   // The TIMER_MODIFY_STATE permission allows setting the timer, and SYNCHRONIZE
+   // allows waiting for it.
+   DWORD desired_access = TIMER_MODIFY_STATE | SYNCHRONIZE;
++typedef HANDLE (WINAPI * CreateWaitableTimerExProc) (
++    LPSECURITY_ATTRIBUTES lpTimerAttributes,
++    LPCTSTR lpTimerName,
++    DWORD dwFlags,
++    DWORD dwDesiredAccess);
++CreateWaitableTimerExProc g_pufnCreateWaitableTimerEx = NULL;
++
++  HINSTANCE  hCoreSynch;
++  hCoreSynch = LoadLibraryW(L"kernel32.dll");
++  // These APIs are only supported on newer Windows versions
++  g_pufnCreateWaitableTimerEx = (CreateWaitableTimerExProc)GetProcAddress(hCoreSynch, "CreateWaitableTimerExW");
++  if (g_pufnCreateWaitableTimerEx)
+   timer_ =
+-      CreateWaitableTimerExW(NULL,  // Cannot be inherited by child processes
++      g_pufnCreateWaitableTimerEx(NULL,  // Cannot be inherited by child processes
+                              NULL,  // Cannot be looked up by name
+                              flags, desired_access);
+ }

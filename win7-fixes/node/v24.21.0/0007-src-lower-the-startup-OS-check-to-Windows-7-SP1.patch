@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: factfinding <970308389@qq.com>
+Date: Fri, 16 Oct 2026 15:00:39 +0800
+Subject: [PATCH 7/7] src: lower the startup OS check to Windows 7 SP1
+
+Not part of Electron-for-windows-7: Electron does not run node_main.cc. NODE_SKIP_PLATFORM_CHECK=1 still bypasses the check.
+---
+ src/node_main.cc | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/src/node_main.cc b/src/node_main.cc
+index 3295121b..29d3e835 100644
+--- a/src/node_main.cc
++++ b/src/node_main.cc
+@@ -32,16 +32,15 @@
+ #define SKIP_CHECK_STRLEN (sizeof(SKIP_CHECK_VALUE) - 1)
+ 
+ int wmain(int argc, wchar_t* wargv[]) {
+-  // Windows Server 2012 (not R2) is supported until 10/10/2023, so we allow it
+-  // to run in the experimental support tier.
++  // Windows 7 build: the minimum is lowered from Windows 10 to Windows 7 SP1.
+   char buf[SKIP_CHECK_STRLEN + 1];
+-  if (!IsWindows10OrGreater() &&
++  if (!IsWindows7SP1OrGreater() &&
+       (GetEnvironmentVariableA(SKIP_CHECK_VAR, buf, sizeof(buf)) !=
+            SKIP_CHECK_STRLEN ||
+        strncmp(buf, SKIP_CHECK_VALUE, SKIP_CHECK_STRLEN) != 0)) {
+     fprintf(stderr,
+-            "Node.js is only supported on Windows 10, Windows "
+-            "Server 2016, or higher.\n"
++            "This Node.js build requires Windows 7 SP1, Windows "
++            "Server 2008 R2 SP1, or higher.\n"
+             "Setting the " SKIP_CHECK_VAR " environment variable "
+             "to 1 skips this\ncheck, but Node.js might not execute "
+             "correctly. Any issues encountered on\nunsupported "

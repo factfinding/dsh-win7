@@ -1,0 +1,13 @@
+diff --git a/chromium_src/BUILD.gn b/chromium_src/BUILD.gn
+--- a/chromium_src/BUILD.gn
++++ b/chromium_src/BUILD.gn
+@@ -212,6 +212,9 @@
+     "//chrome/browser/predictors:resource_prefetch_predictor_proto",
+     "//chrome/browser/resource_coordinator:mojo_bindings",
+     "//chrome/browser/task_manager/common:impl",
++    # [win7] browser_theme_pack.cc calls tabs::IsVerticalTabsFeatureEnabled(). Upstream never links that object; the
++    # Win7 patch "win7dep: remove non aeroglass code" makes native_chrome_color_mixer_win.cc call BrowserThemePack.
++    "//chrome/browser/ui/tabs:features",
+     "//chrome/browser/ui/webui/tab_search:mojo_bindings",
+     "//chrome/browser/web_applications/mojom:mojom_web_apps_enum",
+     "//components/enterprise/buildflags",

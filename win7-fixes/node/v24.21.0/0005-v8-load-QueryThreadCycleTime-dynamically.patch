@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: factfinding <970308389@qq.com>
+Date: Fri, 16 Oct 2026 14:59:47 +0800
+Subject: [PATCH 5/7] v8: load QueryThreadCycleTime dynamically
+
+Source: e3kskoy7wqk/Electron-for-windows-7@1086a0a v44.2.0/chromium/ee43805a66440d78d20310a9f822dffe87237855.diff
+---
+ deps/v8/src/base/platform/time.cc | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/deps/v8/src/base/platform/time.cc b/deps/v8/src/base/platform/time.cc
+index c2d36cc2..05ec56ce 100644
+--- a/deps/v8/src/base/platform/time.cc
++++ b/deps/v8/src/base/platform/time.cc
+@@ -165,6 +165,16 @@ inline bool IsHighResolutionTimer(clockid_t clk_id) {
+ }
+ 
+ #elif V8_OS_WIN
++// Returns a pointer to the QueryThreadCycleTime() function from Windows.
++// Can't statically link to it because it is not available on XP.
++using QueryThreadCycleTimePtr = decltype(::QueryThreadCycleTime)*;
++QueryThreadCycleTimePtr GetQueryThreadCycleTimeFunction() {
++  static const QueryThreadCycleTimePtr query_thread_cycle_time_fn =
++      reinterpret_cast<QueryThreadCycleTimePtr>(::GetProcAddress(
++          ::GetModuleHandle(L"kernel32.dll"), "QueryThreadCycleTime"));
++  return query_thread_cycle_time_fn;
++}
++
+ // Returns the current value of the performance counter.
+ V8_INLINE uint64_t QPCNowRaw() {
+   LARGE_INTEGER perf_counter_now = {};
+@@ -837,7 +847,7 @@ ThreadTicks ThreadTicks::GetForThread(const HANDLE& thread_handle) {
+ #else
+   // Get the number of TSC ticks used by the current thread.
+   ULONG64 thread_cycle_time = 0;
+-  ::QueryThreadCycleTime(thread_handle, &thread_cycle_time);
++  GetQueryThreadCycleTimeFunction()(thread_handle, &thread_cycle_time);
+ 
+   // Get the frequency of the TSC.
+   double tsc_ticks_per_second = TSCTicksPerSecond();
+@@ -853,7 +863,7 @@ ThreadTicks ThreadTicks::GetForThread(const HANDLE& thread_handle) {
+ 
+ // static
+ bool ThreadTicks::IsSupportedWin() {
+-  static bool is_supported = base::CPU().has_non_stop_time_stamp_counter();
++  static bool is_supported = GetQueryThreadCycleTimeFunction() && base::CPU().has_non_stop_time_stamp_counter();
+   return is_supported;
+ }
+ 

@@ -1,0 +1,6 @@
+* text=auto
+# cmd.exe needs CRLF batch files.
+*.cmd text eol=crlf
+# Patches are applied byte for byte with git apply / git am.
+*.patch -text
+*.diff -text
