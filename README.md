@@ -29,18 +29,18 @@
 
 | 顺序 | 文件 | 是否需要 | 作用 |
 |---|---|---|---|
-| 1 | KB2533623（或替代它的 KB3063858） | 必需 | 提供 `AddDllDirectory` 等函数。没有它，Python 和 Office 转换无法启动。 |
-| 2 | KB4474419（SHA-2 更新，v3） | 必需 | 它更新的 advapi32 里有自带 node.exe 要用的 `EventSetInformation`。没有它，node.exe 启动不了，助手运行 Node 命令（比如 Office 转换）时会"退出码 1、无输出"。 |
-| 3 | VC++ 2015–2022 x64 运行库 **14.44.35211** | 必需 | Office 转换需要它。在 Win7 上它会顺带安装通用 C 运行库 UCRT（KB2999226），Python、看图、Office 转换都要用 UCRT。 |
-| – | KB2999226（UCRT） | 备用 | 装完 VC++ 运行库后，如果检查发现没有 UCRT，再单独装它。 |
-| – | KB2670838（平台更新） | 可选 | 真机上配合正常的显卡驱动，可能开启 GPU 加速。虚拟机里没有作用。 |
+| 1 | [KB2533623](https://legacyupdate.net/download-center/download/26764/update-for-windows-7-x64-kb2533623)（或替代它的 KB3063858） | 必需 | 提供 `AddDllDirectory` 等函数。没有它，Python 和 Office 转换无法启动。 |
+| 2 | [KB4474419](https://www.catalog.update.microsoft.com/Search.aspx?q=KB4474419)（SHA-2 更新，v3） | 必需 | 它更新的 advapi32 里有自带 node.exe 要用的 `EventSetInformation`。没有它，node.exe 启动不了，助手运行 Node 命令（比如 Office 转换）时会"退出码 1、无输出"。 |
+| 3 | [VC++ 2015–2022 x64 运行库 **14.44.35211**](https://aka.ms/vs/17/release/vc_redist.x64.exe) | 必需 | Office 转换需要它。在 Win7 上它会顺带安装通用 C 运行库 UCRT（KB2999226），Python、看图、Office 转换都要用 UCRT。 |
+| – | [KB2999226](https://www.microsoft.com/zh-cn/download/details.aspx?id=49077)（UCRT） | 备用 | 装完 VC++ 运行库后，如果检查发现没有 UCRT，再单独装它。 |
+| – | [KB2670838](https://www.microsoft.com/zh-cn/download/details.aspx?id=36805)（平台更新） | 可选 | 真机上配合正常的显卡驱动，可能开启 GPU 加速。虚拟机里没有作用。 |
 
-下载地址：
+下载说明：
 
-- Windows 更新：在 [Microsoft Update Catalog](https://www.catalog.update.microsoft.com/) 搜索 KB 编号，选 "Windows 7 for x64-based Systems" 那一项。
-- VC++ 运行库：<https://aka.ms/vs/17/release/vc_redist.x64.exe>。
-  - **不要**用微软官网"最新版"的 `aka.ms/vc14/vc_redist.x64.exe`：那是 Visual Studio 2026 那一代，只支持 Win10/11。
-  - 14.44.35211 是 2015–2022 系列的最后一版。
+- **KB2533623**：微软下载中心已经下架。链接是 Legacy Update 对原下载页的存档，文件是 Internet Archive 保存的 download.microsoft.com 原始 msu。下载后请按下面的 SHA-256 核对。
+- **KB4474419**：链接到 Microsoft Update Catalog 的搜索结果，选 "Windows 7 for x64-based Systems" 那一项。
+- **KB2999226、KB2670838**：微软下载中心页面，下载 x64 版的 `.msu`。
+- **VC++ 运行库**：链接直接下载 14.44.35211，这是 2015–2022 系列的最后一版。**不要**用微软官网"最新版"的 `aka.ms/vc14/vc_redist.x64.exe`：那是 Visual Studio 2026 那一代，只支持 Win10/11。
 
 装完后在命令提示符里检查：
 
