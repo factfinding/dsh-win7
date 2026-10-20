@@ -1,6 +1,6 @@
 # dsh-win7
 
-让 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）桌面版在 **Windows 7 SP1 x64** 上运行的非官方适配。
+让 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）桌面版在 **Windows 7 SP1 x64** 上运行的非官方适配。效果请看https://www.bilibili.com/video/BV1omJB6pEfn/
 
 > 本项目与 DeepSeek 无关，也不提交到上游。Win7 版的问题请在本仓库提 issue，不要报到官方仓库。
 
