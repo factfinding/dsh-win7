@@ -6,10 +6,10 @@
 
 | | |
 |---|---|
-| 适配的 DSH 版本 | 0.2.1-rc.2（上游 tag `dsh-v0.2.1-rc.2`） |
-| 当前发布 | [`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1) |
-| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.1-rc.2-win7) 的 `dsh-v0.2.1-rc.2-win7` 分支 |
-| 旧版本 | 0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
+| 适配的 DSH 版本 | 0.2.1-rc.3（上游 tag `dsh-v0.2.1-rc.3`） |
+| 当前发布 | [`dsh-v0.2.1-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.3-win7.1) |
+| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.1-rc.3-win7) 的 `dsh-v0.2.1-rc.3-win7` 分支 |
+| 旧版本 | 0.2.1-rc.2：[`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1)；0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
 
 ## 安装
 
@@ -63,7 +63,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 ### 安装 DSH
 
-1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.1-rc.2-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
+1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.1-rc.3-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
 2. 运行它。安装包没有签名，Win7 会提示"无法验证发布者"，点"运行"，然后点"立即安装"。
 3. 装好后开始菜单里会出现 DeepSeek Harness。
 
