@@ -4,7 +4,10 @@
 #   out\win7-runtime-overlay\                rg, libvips, LibreOffice Kit, winpty + version pins (scripts\build-win7-overlay.ps1)
 #   out\pwsh\PowerShell-7.2.24-win-x64.zip   PowerShell 7.2 for the Host PATH on Win7, with its .sha256
 #   out\electron-v44.2.0-win32-x64.zip       Win7-patched Electron (scripts\electron-build.cmd)
-# Needs deepseek-harness\apps\desktop\.env.windows. Extra arguments go to the package script, e.g. --check.
+# Needs deepseek-harness\apps\desktop\.env.windows. Extra arguments go to the package script, e.g. --check, or
+# --build-version 0.2.1-rc.5.20261031.1 for a test build that outranks the release it extends.
+# The update feed is the dsh-win7 Releases' latest/download/ directory unless DSH_WIN7_UPDATE_URL names another
+# (for example a local server while testing updates); the build then carries app-update.yml and emits nightly.yml.
 # Output: deepseek-harness\apps\desktop\.desktop-build\targets\win-x64\unsigned-artifacts\
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
@@ -20,6 +23,7 @@ foreach ($name in $inputs.Keys) {
   Set-Item "env:$name" $inputs[$name]
 }
 $env:DSH_WIN7_PWSH_SHA256 = (Get-Content -Raw "$($inputs.DSH_WIN7_PWSH_ARCHIVE).sha256").Trim()
+if (-not $env:DSH_WIN7_UPDATE_URL) { $env:DSH_WIN7_UPDATE_URL = 'https://github.com/factfinding/dsh-win7/releases/latest/download/' }
 $env:PATH = (Join-Path $root 'tools\node-v24.21.0-win-x64') + ';' + $env:PATH
 $env:COREPACK_ENABLE_DOWNLOAD_PROMPT = '0'
 $env:ELECTRON_SKIP_BINARY_DOWNLOAD = '1'

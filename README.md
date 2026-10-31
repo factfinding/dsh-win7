@@ -6,10 +6,10 @@
 
 | | |
 |---|---|
-| 适配的 DSH 版本 | 0.2.1-rc.3（上游 tag `dsh-v0.2.1-rc.3`） |
-| 当前发布 | [`dsh-v0.2.1-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.3-win7.1) |
-| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.1-rc.3-win7) 的 `dsh-v0.2.1-rc.3-win7` 分支 |
-| 旧版本 | 0.2.1-rc.2：[`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1)；0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
+| 适配的 DSH 版本 | 0.2.1-rc.5（上游 tag `dsh-v0.2.1-rc.5`） |
+| 当前发布 | [`dsh-v0.2.1-rc.5-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.5-win7.1) |
+| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.1-rc.5-win7) 的 `dsh-v0.2.1-rc.5-win7` 分支 |
+| 旧版本 | 0.2.1-rc.3：[`dsh-v0.2.1-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.3-win7.1)；0.2.1-rc.2：[`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1)；0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
 
 ## 安装
 
@@ -63,9 +63,20 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 ### 安装 DSH
 
-1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.1-rc.3-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
+1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.1-rc.5-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
 2. 运行它。安装包没有签名，Win7 会提示"无法验证发布者"，点"运行"，然后点"立即安装"。
 3. 装好后开始菜单里会出现 DeepSeek Harness。
+
+装过旧的 Win7 版的，直接运行新安装包覆盖安装即可。
+
+### 自动更新
+
+从 0.2.1-rc.5 的 Win7 版开始，DSH 会用自己的更新功能定期检查本仓库最新的 Release：
+
+1. 发现新版本时，界面上会提示。确认后开始下载：一般只下载有变化的部分（比如从 rc.3 更新到 rc.5 只下了约 31 MB），不行时才下载整个安装包。
+2. 下载完后再确认安装。安装是静默的：DSH 先退出，装完后自动重新打开。安装期间没有任何窗口，慢的机器上要等一两分钟，不要以为没反应就手动再打开。
+
+检查和下载都要能访问 GitHub。离线或连不上 GitHub 时，自动检查失败不会有提示，照常手动下载安装包更新即可。0.2.1-rc.3 及更早的 Win7 版没有更新地址，需要手动安装一次 rc.5，之后就能自动更新。
 
 ### 离线安装
 
@@ -88,7 +99,6 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 ### 已知限制
 
 - 界面用软件渲染（GPU 加速默认不开），功能不受影响，窗口很大时滚动可能没那么流畅。
-- 没有自动更新。程序会定期检查一个不存在的更新地址，检查失败时什么也不会发生。
 - 很多新版的二进制 Python 包（尤其是用 Rust 写的）在 Win7 上无法导入。给自带的 Python 加装包，请建一个继承自带包的虚拟环境，装完先 import 试一下：
   ```
   "%USERPROFILE%\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe" -m venv --system-site-packages .venv
@@ -107,6 +117,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 | 看图（sharp）、Office 转换（LibreOffice Kit）、语音输入（ONNX Runtime） | 原生 DLL/EXE 导入了 Win8+ 函数 | 兼容层 DLL（[`shim/`](shim)），并改写这些文件的导入表 |
 | 终端 | node-pty 只支持 ConPTY | 自己写的 [`@dsh-win7/pty-winpty`](shim/pty-winpty)（winpty） |
 | DSH 自身 | Job 嵌套、打开方式列表、安装程序等 | 主仓库 fork 里的 8 个提交 |
+| 自动更新 | 未签名的包没有更新地址 | fork 里再加 1 个提交，让 Win7 版从本仓库的 GitHub Release 更新，DSH 的更新代码不改 |
 
 ## 仓库结构
 
