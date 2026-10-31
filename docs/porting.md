@@ -136,7 +136,8 @@
 
 - 打包时设了 `DSH_WIN7_UPDATE_URL`，未签名的 Windows 包里就会有 `resources\app-update.yml`，DSH 的更新功能看到它才会开启。地址默认是本仓库的 `releases/latest/download/`，GitHub 会把它跳转到标为 Latest 的那个 Release。
 - 更新频道是 `nightly`，所以要找的是 `nightly.yml`。`prepare-win7-release.ps1` 把里面安装包的地址改成带 tag 的绝对地址 `releases/download/<tag>/<安装包>`，安装包和 `.blockmap` 则按上面的文件名放在同一个 Release 里。
-- **增量下载：** electron-updater 把新安装包地址里的新版本号全部换成已安装的版本号，再加上 `.blockmap`，就得到旧版本 blockmap 的地址。按 `dsh-v<版本>-win7.1` 的 tag 和 `deepseek-harness-<版本>-win7-x64-unsigned.exe` 的文件名，这个地址正好落在旧版本自己的 Release 里，所以每个 Release 只放自己的三个文件。旧安装包取自安装时缓存的 `%LOCALAPPDATA%\@deepseek-aidsh-desktop-updater\installer.exe`。缺 blockmap 或缓存时会退回完整下载，不影响更新。
+- **增量下载：** 旧安装包取自安装时缓存的 `%LOCALAPPDATA%\@deepseek-aidsh-desktop-updater\installer.exe`。旧版本的 blockmap 优先用同一目录里的 `current.blockmap`，它是上次自动更新时存下的；没有这个文件时（手动安装的版本），electron-updater 把新安装包地址里的新版本号全部换成已安装的版本号，再加上 `.blockmap`，就得到旧版本 blockmap 的地址。按 `dsh-v<版本>-win7.1` 的 tag 和 `deepseek-harness-<版本>-win7-x64-unsigned.exe` 的文件名，这个地址正好落在旧版本自己的 Release 里，所以每个 Release 只放自己的三个文件。
+- 缺 blockmap 或缓存时会退回完整下载。自动更新过以后又手动装了别的版本时，`current.blockmap` 和 `installer.exe` 就对不上了，拼出来的文件过不了 SHA-512 校验，也会退回完整下载。这些情况只是多下载一些，不会装坏。
 - GitHub 支持单段 Range 请求，多段的会回 501，所以更新地址带 `useMultipleRangeRequest: false`，一次请求一段。
 - 更新是静默安装：DSH 退出，装完后自动重新打开，期间没有窗口。
 
@@ -166,7 +167,8 @@
    useMultipleRangeRequest: false
    updaterCacheDirName: '@deepseek-aidsh-desktop-updater'
    ```
-4. 在 DSH 里检查更新、下载、安装。服务器日志里安装包的请求应该都是 206，加起来远小于安装包大小，这说明走的是增量下载。装完后 DSH 会自动重新打开，版本变成新版。
+   如果这台虚拟机之前自动更新过，再装回旧版来测，先删掉 `%LOCALAPPDATA%\@deepseek-aidsh-desktop-updater\` 下的 `pending` 目录和 `current.blockmap`。不删的话，electron-updater 会直接用 `pending` 里已经下好的安装包；`current.blockmap` 和重装的旧安装包对不上，也会退回完整下载。
+4. 在 DSH 里检查更新、下载、安装。服务器日志里安装包的请求应该都是 206，加起来远小于安装包大小，这说明走的是增量下载。装完后 DSH 会自动重新打开，版本变成新版。DSH 不记录更新日志，用 GitHub 实测时没有服务器日志可看，可以在虚拟机里对比 `netstat -e` 的接收字节数，只要明显小于安装包大小，就说明没有退回完整下载。
 
 想测"已安装的这一版再往后更新"时，用 `scripts\package-desktop-win7.ps1 --build-version X.<日期>.<n>` 打一个版本号更高、其余相同的测试包，它的 tag 和文件名按这个版本号来。发布后，还要把 `app-update.yml` 的地址换回 GitHub，从真实的 Release 再测一次。
 
