@@ -6,10 +6,10 @@
 
 | | |
 |---|---|
-| 适配的 DSH 版本 | 0.2.1-rc.5（上游 tag `dsh-v0.2.1-rc.5`） |
-| 当前发布 | [`dsh-v0.2.1-rc.5-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.5-win7.1) |
-| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.1-rc.5-win7) 的 `dsh-v0.2.1-rc.5-win7` 分支 |
-| 旧版本 | 0.2.1-rc.3：[`dsh-v0.2.1-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.3-win7.1)；0.2.1-rc.2：[`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1)；0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
+| 适配的 DSH 版本 | 0.2.2-rc.1（上游 tag `dsh-v0.2.2-rc.1`） |
+| 当前发布 | [`dsh-v0.2.2-rc.1-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.1-win7.1) |
+| DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.2-rc.1-win7) 的 `dsh-v0.2.2-rc.1-win7` 分支 |
+| 旧版本 | 0.2.1-rc.5：[`dsh-v0.2.1-rc.5-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.5-win7.1)；0.2.1-rc.3：[`dsh-v0.2.1-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.3-win7.1)；0.2.1-rc.2：[`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1)；0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
 
 ## 安装
 
@@ -33,7 +33,7 @@
 | 2 | [KB4474419](https://www.catalog.update.microsoft.com/Search.aspx?q=KB4474419)（SHA-2 更新，v3） | 必需 | 它更新的 advapi32 里有自带 node.exe 要用的 `EventSetInformation`。没有它，node.exe 启动不了，助手运行 Node 命令（比如 Office 转换）时会"退出码 1、无输出"。 |
 | 3 | [VC++ 2015–2022 x64 运行库 **14.44.35211**](https://aka.ms/vs/17/release/vc_redist.x64.exe) | 必需 | Office 转换需要它。在 Win7 上它会顺带安装通用 C 运行库 UCRT（KB2999226），Python、看图、Office 转换都要用 UCRT。 |
 | – | [KB2999226](https://www.microsoft.com/zh-cn/download/details.aspx?id=49077)（UCRT） | 备用 | 装完 VC++ 运行库后，如果检查发现没有 UCRT，再单独装它。 |
-| – | [KB2670838](https://www.microsoft.com/zh-cn/download/details.aspx?id=36805)（平台更新） | 可选 | 真机上配合正常的显卡驱动，可能开启 GPU 加速。虚拟机里没有作用。 |
+| – | [KB2670838](https://www.microsoft.com/zh-cn/download/details.aspx?id=36805)（平台更新） | 建议（真机） | 开 GPU 加速要靠它：它把 DXGI 升到 1.2，界面的 Direct3D 11 渲染需要。实体机装上并重启后，GPU 加速已验证可以开启。虚拟机里没有作用，Chromium 不在 VMware 显卡上开 GPU 加速。 |
 
 下载说明：
 
@@ -63,7 +63,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 ### 安装 DSH
 
-1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.1-rc.5-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
+1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.2-rc.1-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
 2. 运行它。安装包没有签名，Win7 会提示"无法验证发布者"，点"运行"，然后点"立即安装"。
 3. 装好后开始菜单里会出现 DeepSeek Harness。
 
@@ -73,10 +73,10 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 从 0.2.1-rc.5 的 Win7 版开始，DSH 会用自己的更新功能定期检查本仓库最新的 Release：
 
-1. 发现新版本时，界面上会提示。确认后开始下载：一般只下载有变化的部分（比如从 rc.3 更新到 rc.5 只下了约 31 MB），不行时才下载整个安装包。
+1. 发现新版本时，界面上会提示。确认后开始下载：只下载有变化的部分，不行时才下载整个安装包。小版本之间改动少，下载量也小（从 rc.3 更新到 rc.5 只下了约 31 MB）；大版本之间几乎全变了，下载量接近整个安装包（从 0.2.1-rc.5 更新到 0.2.2-rc.1 下了约 398 MB）。
 2. 下载完后再确认安装。安装是静默的：DSH 先退出，装完后自动重新打开。安装期间没有任何窗口，慢的机器上要等一两分钟，不要以为没反应就手动再打开。
 
-检查和下载都要能访问 GitHub。离线或连不上 GitHub 时，自动检查失败不会有提示，照常手动下载安装包更新即可。0.2.1-rc.3 及更早的 Win7 版没有更新地址，需要手动安装一次 rc.5，之后就能自动更新。
+检查和下载都要能访问 GitHub。离线或连不上 GitHub 时，自动检查失败不会有提示，照常手动下载安装包更新即可。0.2.1-rc.3 及更早的 Win7 版没有更新地址，需要手动安装一次新版，之后就能自动更新。
 
 ### 离线安装
 
@@ -98,7 +98,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 ### 已知限制
 
-- 界面用软件渲染（GPU 加速默认不开），功能不受影响，窗口很大时滚动可能没那么流畅。
+- 没装 KB2670838、在虚拟机里或通过远程桌面使用时，界面用软件渲染，功能不受影响，窗口很大时滚动可能没那么流畅。想确认 GPU 加速开没开，可以把本仓库 [`scripts`](scripts) 下的 `win7-gpu-check.cmd` 和 `win7-gpu-check.mjs` 下载到同一个文件夹，退出 DSH 后双击前者运行，最后一行会显示 ON 或 OFF。
 - 很多新版的二进制 Python 包（尤其是用 Rust 写的）在 Win7 上无法导入。给自带的 Python 加装包，请建一个继承自带包的虚拟环境，装完先 import 试一下：
   ```
   "%USERPROFILE%\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe" -m venv --system-site-packages .venv
@@ -109,7 +109,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 | 组件 | 上游的问题 | 适配方式 |
 |---|---|---|
-| Electron | 官方 44.x 只支持 Win10+ | 用社区补丁 [Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) 自己编译 Electron 44.2.0，再加上 [`win7-fixes/electron`](win7-fixes/electron) 里的修复。DSH 0.2.1 声明的是 `^44.7.0`，社区补丁目前只到 44.2.0，所以钉在 44.2.0 |
+| Electron | 官方 44.x 只支持 Win10+ | 用社区补丁 [Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) 自己编译 Electron 44.2.0，再加上 [`win7-fixes/electron`](win7-fixes/electron) 里的修复。DSH 0.2.2 声明的是 `^44.7.0`，社区补丁目前只到 44.2.0，所以钉在 44.2.0 |
 | 自带 Node.js | 官方 24.x 不能在 Win7 上启动 | 用 Node 24.21.0 源码加 [`win7-fixes/node`](win7-fixes/node) 的 7 个补丁编译 |
 | 自带 Python | python-build-standalone 依赖 Win8+ API | 换成 [PythonVista](https://github.com/adang1345/PythonVista) 3.12.14 |
 | PowerShell | Win7 自带的 2.0 在沙箱里启动不了 | 自带 PowerShell 7.2.24 |

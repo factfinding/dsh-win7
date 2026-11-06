@@ -4,12 +4,12 @@
 
 所有命令都在仓库根目录下用 PowerShell 7 运行。
 
-## 版本对应（dsh-v0.2.1-rc.5-win7.1）
+## 版本对应（dsh-v0.2.2-rc.1-win7.1）
 
 | 组件 | 版本 | 固定在哪里 |
 |---|---|---|
-| DSH | 上游 tag `dsh-v0.2.1-rc.5` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.1-rc.5-win7` 上有 9 个提交：8 个 Win7 适配，加 1 个自动更新地址；tag 是 `dsh-v0.2.1-rc.5-win7.1` |
-| Electron | 44.2.0：Chromium 152.0.7977.76（`src@0d89dfa2`），electron_node `71b8b174`（v24.20.0）。DSH 0.2.1 声明 `^44.7.0`（Chromium 152.0.7977.130），社区补丁目前只到 44.2.0，fork 里钉在 44.2.0 | `scripts/electron.gclient`、`scripts/electron-sync.cmd`；gn 参数在 `scripts/electron-release.gn`；版本钉在主仓库 `apps/desktop/package.json` |
+| DSH | 上游 tag `dsh-v0.2.2-rc.1` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.2-rc.1-win7` 上有 9 个提交：8 个 Win7 适配，加 1 个自动更新地址；tag 是 `dsh-v0.2.2-rc.1-win7.1` |
+| Electron | 44.2.0：Chromium 152.0.7977.76（`src@0d89dfa2`），electron_node `71b8b174`（v24.20.0）。DSH 0.2.2 声明 `^44.7.0`（Chromium 152.0.7977.130），社区补丁目前只到 44.2.0，fork 里钉在 44.2.0 | `scripts/electron.gclient`、`scripts/electron-sync.cmd`；gn 参数在 `scripts/electron-release.gn`；版本钉在主仓库 `apps/desktop/package.json` |
 | pnpm | 11.28.5（随自带运行时分发） | 主仓库根目录 `package.json` 的 `packageManager` |
 | Electron Win7 补丁 | [e3kskoy7wqk/Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) `1086a0a7`（目录 `v44.2.0`），外加 `win7-fixes/electron` | `scripts/apply-electron-win7-patches.ps1` |
 | 自带 Node | 24.21.0，外加 `win7-fixes/node/v24.21.0` 的 7 个补丁 | 主仓库 `scripts/primary-runtime/lock.json` 里的 `nodeSha256` |
@@ -63,8 +63,8 @@
    - 把 `out\ripgrep-target\x86_64-win7-windows-msvc\release-lto\rg.exe` 拷成 `out\rg-15.0.0-win7-x64.exe`。
 4. **winpty：** 下载 [winpty 0.4.3](https://github.com/rprichard/winpty/releases/tag/0.4.3) 的 `winpty-0.4.3-msvc2015.zip`（sha256 `35a48ece…`，完整值见 `scripts/build-pty-winpty.ps1`），解压到 `out\winpty\extract\`。
 5. **PowerShell：** 下载 [PowerShell 7.2.24](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) 的 `PowerShell-7.2.24-win-x64.zip`，放到 `out\pwsh\`。旁边建一个同名 `.sha256` 文件，里面只写哈希值。
-6. **参考 node_modules：** 用官方 Node 在 `out\host-web-0.2.1-rc.5\` 里运行 `npm install --ignore-scripts @deepseek-ai/dsh@0.2.1-rc.5`。覆盖层以这些文件为原件，记下它们的 sha256，并读出要固定的版本。
-7. **覆盖层：** 运行 `scripts\build-win7-overlay.ps1 -Reference out\host-web-0.2.1-rc.5\node_modules`，生成 `out\win7-runtime-overlay\`。兼容层 DLL 会在这一步编译。
+6. **参考 node_modules：** 用官方 Node 在 `out\host-web-0.2.2-rc.1\` 里运行 `npm install --ignore-scripts @deepseek-ai/dsh@0.2.2-rc.1`。覆盖层以这些文件为原件，记下它们的 sha256，并读出要固定的版本。
+7. **覆盖层：** 运行 `scripts\build-win7-overlay.ps1 -Reference out\host-web-0.2.2-rc.1\node_modules`，生成 `out\win7-runtime-overlay\`。兼容层 DLL 会在这一步编译。
 8. **打包：**
    - 先建 `deepseek-harness\apps\desktop\.env.windows`：
      ```
@@ -78,6 +78,7 @@
    - 产物在 `deepseek-harness\apps\desktop\.desktop-build\targets\win-x64\unsigned-artifacts\`：安装包、它的 `.blockmap` 和 `nightly.yml`。
    - 打包最后的自检（`smoke-packaged-runtime`）偶尔会超时：离线安装插件那一步只给 120 秒，而新生成的程序第一次运行会比较慢。这时安装包其实已经生成，在 `deepseek-harness\apps\desktop\` 下单独重跑 `corepack pnpm exec tsx scripts/smoke-packaged-runtime.ts --unsigned`，通过即可（0.2.1-rc.2 和 rc.3 两次打包都遇到了）。
    - 构建阶段偶尔会在 inspector 的 DevTools 那一步报 `EPERM: operation not permitted, rename …devtools.build-xxxx -> …devtools`：刚写出的几千个文件被别的进程（多半是杀毒软件扫描）占着。重新打包即可。
+   - 打包时开着 VS Code，要在工作区设置的 `files.watcherExclude` 里排除 `**/.desktop-build/**`，改完重启 VS Code 才生效。Python Environments 扩展（`ms-python.vscode-python-envs`）每看到一个 `.py` 变化就启动一个 `rg` 扫描工作区，而打包要解压几千个 `.py`，`rg` 会占满所有 CPU。表现是电脑卡死，或者 `prepare:primary-runtime` 报 `spawnSync …python.exe ETIMEDOUT`（Python 自检每步限 120 秒）。排除后，打包从超时失败变成约 10 分钟完成。
 
 ### 检查与测试
 
@@ -97,17 +98,18 @@
     - `scripts/win7-smoke.js`：Node 本身；
     - `scripts/win7-native-test.js`：原生模块；
     - `scripts/win7-voice-test.js`：语音推理；
+    - `scripts/win7-gpu-check.cmd`：用 DevTools 端口启动 DSH，读出 `chrome://gpu` 的特性状态，判断是否开了 GPU 加速。实体机装 KB2670838 后为开启；虚拟机里 Chromium 的黑名单屏蔽了 VMware 显卡，始终是软件渲染；
     - `scripts/win7-job-probe/`：查进程所在的 Job。
 
 ## 适配 DSH 新版本
 
-假设上游新 tag 是 `dsh-vX`，上一次适配的是 `dsh-v0.2.1-rc.5`：
+假设上游新 tag 是 `dsh-vX`，上一次适配的是 `dsh-v0.2.2-rc.1`：
 
 1. **迁移源码改动**
    ```powershell
    git -C deepseek-harness fetch origin --tags
    git -C deepseek-harness switch -c dsh-vX-win7 dsh-vX
-   git -C deepseek-harness cherry-pick dsh-v0.2.1-rc.5..dsh-v0.2.1-rc.5-win7
+   git -C deepseek-harness cherry-pick dsh-v0.2.2-rc.1..dsh-v0.2.2-rc.1-win7
    ```
    - 逐个解决冲突。9 个提交各管一件事，提交信息写了原因，可以据此判断上游是否已经换了做法。
    - 冲突解决完以后，先在主仓库里 `corepack pnpm install --frozen-lockfile`，再继续 cherry-pick。否则 pre-commit 钩子可能因为 `node_modules` 还是旧版本而报错（比如 "Provider metadata is stale"）。
@@ -137,7 +139,7 @@
 - 打包时设了 `DSH_WIN7_UPDATE_URL`，未签名的 Windows 包里就会有 `resources\app-update.yml`，DSH 的更新功能看到它才会开启。地址默认是本仓库的 `releases/latest/download/`，GitHub 会把它跳转到标为 Latest 的那个 Release。
 - 更新频道是 `nightly`，所以要找的是 `nightly.yml`。`prepare-win7-release.ps1` 把里面安装包的地址改成带 tag 的绝对地址 `releases/download/<tag>/<安装包>`，安装包和 `.blockmap` 则按上面的文件名放在同一个 Release 里。
 - **增量下载：** 旧安装包取自安装时缓存的 `%LOCALAPPDATA%\@deepseek-aidsh-desktop-updater\installer.exe`。旧版本的 blockmap 优先用同一目录里的 `current.blockmap`，它是上次自动更新时存下的；没有这个文件时（手动安装的版本），electron-updater 把新安装包地址里的新版本号全部换成已安装的版本号，再加上 `.blockmap`，就得到旧版本 blockmap 的地址。按 `dsh-v<版本>-win7.1` 的 tag 和 `deepseek-harness-<版本>-win7-x64-unsigned.exe` 的文件名，这个地址正好落在旧版本自己的 Release 里，所以每个 Release 只放自己的三个文件。
-- 缺 blockmap 或缓存时会退回完整下载。自动更新过以后又手动装了别的版本时，`current.blockmap` 和 `installer.exe` 就对不上了，拼出来的文件过不了 SHA-512 校验，也会退回完整下载。这些情况只是多下载一些，不会装坏。
+- 缺 blockmap 或缓存时会退回完整下载。自动更新过以后又手动装了别的版本时，`current.blockmap` 和 `installer.exe` 就对不上了，拼出来的文件过不了 SHA-512 校验，也会退回完整下载。这些情况只是多下载一些，不会装坏。增量的大小取决于两版安装包有多少块相同：rc.3 到 rc.5 要下 31 MB，上游改动大的 0.2.1-rc.5 到 0.2.2-rc.1 要下 398 MB，接近整包。
 - GitHub 支持单段 Range 请求，多段的会回 501，所以更新地址带 `useMultipleRangeRequest: false`，一次请求一段。
 - 更新是静默安装：DSH 退出，装完后自动重新打开，期间没有窗口。
 
