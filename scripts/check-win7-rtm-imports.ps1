@@ -46,7 +46,8 @@ function Get-Exports([string] $dll, [string] $system) {
   foreach ($line in & $dumpbin /nologo /exports $file) {
     if ($line -match '^\s+ordinal\s+hint') { $table = $true; continue }
     if ($table -and $line -match '^\s+Summary') { break }
-    if ($table -and $line -match '^\s+\d+\s+[0-9A-F]+\s+(?:[0-9A-F]{8}\s+)?(\S+)') { [void]$set.Add($Matches[1]) }
+    # Ordinals are recorded as #<n> beside the names: some programs import by ordinal only.
+    if ($table -and $line -match '^\s+(\d+)\s+[0-9A-F]+\s+(?:[0-9A-F]{8}\s+)?(\S+)') { [void]$set.Add($Matches[2]); [void]$set.Add("#$($Matches[1])") }
   }
   if ($dll -eq 'kernel32.dll') { 'SetDefaultDllDirectories', 'AddDllDirectory', 'RemoveDllDirectory' | ForEach-Object { [void]$set.Add($_) } }
   $exports[$key] = $set
@@ -76,8 +77,9 @@ foreach ($file in $files) {
       continue
     }
     if ($null -eq $dll -or $provided) { continue }
-    if ($line -match '^\s+[0-9A-F]+\s+(\S+)\s*$') {
-      $function = $Matches[1]
+    # dumpbin lists a named import as "<hint> <name>" and an ordinal-only import as "Ordinal <n>".
+    $function = if ($line -match '^\s+Ordinal\s+(\d+)\s*$') { "#$($Matches[1])" } elseif ($line -match '^\s+[0-9A-F]+\s+(\S+)\s*$') { $Matches[1] }
+    if ($null -ne $function) {
       $set = Get-Exports $dll $system
       $relative = $file.FullName.Substring($Root.TrimEnd('\').Length + 1)
       if ($null -eq $set) { "MISSING DLL   $relative -> $dll!$function"; $problems++ }

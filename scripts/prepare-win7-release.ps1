@@ -3,6 +3,9 @@
 #   deepseek-harness-<version>-win7-x64-unsigned.exe            the installer
 #   deepseek-harness-<version>-win7-x64-unsigned.exe.blockmap   its block map, for differential downloads
 #   nightly.yml                                                 channel file, with the installer's absolute URL
+#   stable.yml                                                  the same channel file for the stable channel
+# Desktop 0.2.2-rc.3 lets the user switch between the nightly and stable channels in settings; the Windows 7
+# builds have one line of releases, so both channel files describe the same installer.
 # nightly.yml names the installer by its URL inside the release's own tag directory. The updater derives the
 # installed version's block map by replacing the version in that URL, so it resolves to the older release's
 # own block map and each release carries only its own files.
@@ -36,7 +39,9 @@ if (-not $channel.Contains("sha512: $sha512")) { throw 'nightly.yml SHA-512 does
 $url = "$BaseUrl$Tag/$name"
 $rewritten = $channel -replace "(?m)^(\s*-?\s*(?:url|path): )$([regex]::Escape($built))(\r?)$", "`${1}$url`${2}"
 if (([regex]::Matches($rewritten, [regex]::Escape($url))).Count -ne 2) { throw 'expected url and path entries for the installer in nightly.yml' }
-[IO.File]::WriteAllText((Join-Path $Out 'nightly.yml'), $rewritten, [Text.UTF8Encoding]::new($false))
+foreach ($channelFile in 'nightly.yml', 'stable.yml') {
+  [IO.File]::WriteAllText((Join-Path $Out $channelFile), $rewritten, [Text.UTF8Encoding]::new($false))
+}
 
 $sha256 = (Get-FileHash (Join-Path $Out $name) -Algorithm SHA256).Hash.ToLower()
 "$sha256  $name" | Set-Content (Join-Path $Out "$name.sha256") -Encoding ascii

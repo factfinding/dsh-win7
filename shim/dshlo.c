@@ -1,19 +1,23 @@
 /*
- * dshlo.dll: Windows 8+/10 entry points that libreoffice-kit.exe imports, for Windows 7.
+ * dshlo.dll: Windows 8+/10 entry points that LibreOffice Kit's engine imports, for Windows 7. The
+ * engine is bin/dsoffice.exe since Kit 0.2 and was bin/libreoffice-kit.exe before.
  *
- * scripts/patch-imports.ps1 renames the exe's kernel32.dll, user32.dll and bcrypt.dll
- * imports to dshlo.dll. The generated out/shim/dshlo.def forwards every other function the
- * exe imports from those DLLs back to them (scripts/gen-forward-def.ps1), and maps the four
- * functions Windows 7 lacks to the implementations below. Each calls the real API when the
- * running Windows has it, so behavior on Windows 8+/10 is unchanged.
+ * scripts/patch-imports.ps1 renames the exe's kernel32.dll, user32.dll and bcrypt.dll imports,
+ * and the API set names Windows 7 lacks, to dshlo.dll. The generated out/shim/dshlo.def forwards
+ * every other function the exe imports from those DLLs back to them, and the API set functions
+ * to the DLLs that hold them on Windows 7: version, winmm, user32 and kernel32
+ * (scripts/gen-forward-def.ps1). The functions Windows 7 lacks map to the implementations below.
+ * Each calls the real API when the running Windows has it, so behavior on Windows 8+/10 is unchanged.
  *
- * Windows 7 fallbacks (libreoffice-kit renders and converts documents without windows):
+ * Windows 7 fallbacks (the engine renders and converts documents without windows):
  *  - GetCurrentPackageFullName: APPMODEL_ERROR_NO_PACKAGE, the answer for any unpackaged process.
  *  - GetSystemTimePreciseAsFileTime: GetSystemTimeAsFileTime (same clock, coarser resolution).
  *  - SetThreadDpiAwarenessContext: no per-thread DPI awareness exists, so nothing changes. It
  *    returns the context matching the process-wide awareness (SYSTEM_AWARE when IsProcessDPIAware,
  *    else UNAWARE) because callers treat NULL as failure; restoring with that value is a no-op too.
  *  - BCryptKeyDerivation: STATUS_NOT_SUPPORTED.
+ *  - CompareObjectHandles: equal handle values only. Windows 7 has no call that tells whether two
+ *    different handles name one kernel object, so duplicated handles compare as different objects.
  */
 #include <windows.h>
 
@@ -27,6 +31,7 @@ typedef VOID(WINAPI *get_system_time_precise_fn)(LPFILETIME);
 typedef HANDLE(WINAPI *set_thread_dpi_awareness_context_fn)(HANDLE);
 typedef LONG(WINAPI *bcrypt_key_derivation_fn)(HANDLE, PVOID, PUCHAR, ULONG, ULONG *, ULONG);
 typedef BOOL(WINAPI *is_process_dpi_aware_fn)(void);
+typedef BOOL(WINAPI *compare_object_handles_fn)(HANDLE, HANDLE);
 
 /* DPI_AWARENESS_CONTEXT_UNAWARE and DPI_AWARENESS_CONTEXT_SYSTEM_AWARE from windef.h. */
 #define DSH_DPI_CONTEXT_UNAWARE ((HANDLE)(LONG_PTR)-1)
@@ -38,6 +43,7 @@ static get_system_time_precise_fn real_get_system_time_precise;
 static set_thread_dpi_awareness_context_fn real_set_thread_dpi_awareness_context;
 static bcrypt_key_derivation_fn real_bcrypt_key_derivation;
 static is_process_dpi_aware_fn is_process_dpi_aware;
+static compare_object_handles_fn real_compare_object_handles;
 
 static FARPROC export_of(LPCWSTR module, LPCSTR name) {
   HMODULE handle = LoadLibraryExW(module, NULL, 0);
@@ -51,6 +57,7 @@ static BOOL CALLBACK resolve(PINIT_ONCE once, PVOID parameter, PVOID *context) {
   real_set_thread_dpi_awareness_context = (set_thread_dpi_awareness_context_fn)export_of(L"user32.dll", "SetThreadDpiAwarenessContext");
   is_process_dpi_aware = (is_process_dpi_aware_fn)export_of(L"user32.dll", "IsProcessDPIAware");
   real_bcrypt_key_derivation = (bcrypt_key_derivation_fn)export_of(L"bcrypt.dll", "BCryptKeyDerivation");
+  real_compare_object_handles = (compare_object_handles_fn)export_of(L"kernelbase.dll", "CompareObjectHandles");
   return TRUE;
 }
 
@@ -83,6 +90,12 @@ LONG WINAPI DshBCryptKeyDerivation(HANDLE key, PVOID parameters, PUCHAR derived,
   if (real_bcrypt_key_derivation != NULL) return real_bcrypt_key_derivation(key, parameters, derived, derived_size, result_size, flags);
   if (result_size != NULL) *result_size = 0;
   return DSH_STATUS_NOT_SUPPORTED;
+}
+
+BOOL WINAPI DshCompareObjectHandles(HANDLE first, HANDLE second) {
+  ensure_resolved();
+  if (real_compare_object_handles != NULL) return real_compare_object_handles(first, second);
+  return first == second;
 }
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved) {

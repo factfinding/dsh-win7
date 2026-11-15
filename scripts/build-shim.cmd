@@ -16,4 +16,4 @@ call "%VS%\VC\Auxiliary\Build\vcvars64.bat" > nul || exit /b 1
 if not exist "%ROOT%\out\shim" mkdir "%ROOT%\out\shim"
 cd /d "%ROOT%\out\shim" || exit /b 1
 rem link.exe resolves "name = dll.export" forwarders against import libraries, so every forwarded DLL's .lib is listed.
-cl /nologo /O2 /W4 /MT /LD "%ROOT%\shim\%NAME%.c" /link /DEF:"%DEF%" /OUT:%NAME%.dll /SUBSYSTEM:WINDOWS,6.01 kernel32.lib user32.lib bcrypt.lib
+cl /nologo /O2 /W4 /MT /LD "%ROOT%\shim\%NAME%.c" /link /DEF:"%DEF%" /OUT:%NAME%.dll /SUBSYSTEM:WINDOWS,6.01 kernel32.lib user32.lib bcrypt.lib version.lib winmm.lib shlwapi.lib

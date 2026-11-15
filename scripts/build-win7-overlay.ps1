@@ -9,7 +9,8 @@
 # Entries (paths relative to the packaged runtime root):
 #   @vscode/ripgrep-win32-x64/bin/rg.exe              <- out\rg-15.0.0-win7-x64.exe (scripts\build-ripgrep.ps1)
 #   @img/sharp-win32-x64/lib/libvips-42.dll           <- imports renamed to dshw7.dll; + dshw7.dll
-#   @deepseek-ai/libreoffice-kit-win32-x64/bin/...exe <- kernel32/user32/bcrypt imports renamed to dshlo.dll; + dshlo.dll
+#   @deepseek-ai/libreoffice-kit-win32-x64/bin/dsoffice.exe <- kernel32/user32/bcrypt imports and the API set
+#                                                        names Windows 7 lacks renamed to dshlo.dll; + dshlo.dll
 #   @deepseek-ai/libreoffice-kit/lib/{index,cli}.js   <- read-only-aware rm (shim\libreoffice-kit-rm.js)
 #   sherpa-onnx-win-x64/onnxruntime.dll               <- kernel32/dxgi/api-ms-win-core-path imports renamed to dsho.dll; + dsho.dll
 #   @dsh-win7/pty-winpty/                             <- out\pty-winpty (scripts\build-pty-winpty.ps1)
@@ -60,21 +61,35 @@ New-Item -ItemType Directory -Force (Join-Path $files 'sharp') | Out-Null
 Add-Entry '@img/sharp-win32-x64/lib/libvips-42.dll' 'files/sharp/libvips-42.dll' (Sha256 $vips)
 Add-Entry '@img/sharp-win32-x64/lib/dshw7.dll' (Stage (Join-Path $root 'out\shim\dshw7.dll') 'sharp\dshw7.dll') $null
 
-# LibreOffice Kit engine: libreoffice-kit.exe + dshlo.dll (forwarders generated from this exe's imports)
-$kitExe = Reference '@deepseek-ai\libreoffice-kit-win32-x64\bin\libreoffice-kit.exe'
-$kitImports = Join-Path $Out 'libreoffice-kit-imports.tsv'
+# LibreOffice Kit engine: dsoffice.exe (libreoffice-kit.exe before Kit 0.2) + dshlo.dll (forwarders generated
+# from this exe's imports). The API set names exist from Windows 8 on; their functions live in these DLLs on 7.
+$kitExe = Reference '@deepseek-ai\libreoffice-kit-win32-x64\bin\dsoffice.exe'
+$kitImports = Join-Path $Out 'dsoffice-imports.tsv'
+$kitApiSets = [ordered]@{
+  'api-ms-win-core-version-l1-1-0.dll' = 'version'
+  'api-ms-win-core-version-l1-1-1.dll' = 'version'
+  'api-ms-win-mm-time-l1-1-0.dll' = 'winmm'
+  'api-ms-win-core-string-l2-1-0.dll' = 'user32'
+  'api-ms-win-core-handle-l1-1-0.dll' = 'kernel32'
+  'api-ms-win-shcore-path-l1-1-0.dll' = 'shlwapi'
+}
+# Ordinal-only imports from those API sets, named after the Windows SDK's OneCore_apiset.lib records.
+$kitOrdinals = @{ 'api-ms-win-shcore-path-l1-1-0.dll#170' = 'PathIsNetworkPathW' }
 & "$scripts\dump-imports.ps1" -Exe $kitExe -OutTsv $kitImports | Out-Host
-& "$scripts\gen-forward-def.ps1" -Tsv $kitImports -Library dshlo -Dlls kernel32.dll, user32.dll, bcrypt.dll -Implemented @{
+& "$scripts\gen-forward-def.ps1" -Tsv $kitImports -Library dshlo -Dlls (@('kernel32.dll', 'user32.dll', 'bcrypt.dll') + $kitApiSets.Keys) -Implemented @{
   GetCurrentPackageFullName = 'DshGetCurrentPackageFullName'
   GetSystemTimePreciseAsFileTime = 'DshGetSystemTimePreciseAsFileTime'
   SetThreadDpiAwarenessContext = 'DshSetThreadDpiAwarenessContext'
   BCryptKeyDerivation = 'DshBCryptKeyDerivation'
-} -Out (Join-Path $root 'out\shim\dshlo.def') | Out-Host
+  CompareObjectHandles = 'DshCompareObjectHandles'
+} -ForwardTo $kitApiSets -Ordinals $kitOrdinals -Out (Join-Path $root 'out\shim\dshlo.def') | Out-Host
 cmd /c "`"$scripts\build-shim.cmd`" dshlo `"$root\out\shim\dshlo.def`"" | Out-Host
 if ($LASTEXITCODE -ne 0) { throw 'dshlo build failed' }
 New-Item -ItemType Directory -Force (Join-Path $files 'libreoffice-kit') | Out-Null
-& "$scripts\patch-imports.ps1" -File $kitExe -Out (Join-Path $files 'libreoffice-kit\libreoffice-kit.exe') -Rename @{ 'kernel32.dll' = 'dshlo.dll'; 'user32.dll' = 'dshlo.dll'; 'bcrypt.dll' = 'dshlo.dll' } | Out-Host
-Add-Entry '@deepseek-ai/libreoffice-kit-win32-x64/bin/libreoffice-kit.exe' 'files/libreoffice-kit/libreoffice-kit.exe' (Sha256 $kitExe)
+$kitRename = @{ 'kernel32.dll' = 'dshlo.dll'; 'user32.dll' = 'dshlo.dll'; 'bcrypt.dll' = 'dshlo.dll' }
+foreach ($dll in $kitApiSets.Keys) { $kitRename[$dll] = 'dshlo.dll' }
+& "$scripts\patch-imports.ps1" -File $kitExe -Out (Join-Path $files 'libreoffice-kit\dsoffice.exe') -Rename $kitRename | Out-Host
+Add-Entry '@deepseek-ai/libreoffice-kit-win32-x64/bin/dsoffice.exe' 'files/libreoffice-kit/dsoffice.exe' (Sha256 $kitExe)
 Add-Entry '@deepseek-ai/libreoffice-kit-win32-x64/bin/dshlo.dll' (Stage (Join-Path $root 'out\shim\dshlo.dll') 'libreoffice-kit\dshlo.dll') $null
 
 # LibreOffice Kit JavaScript: rm that clears read-only attributes on Windows
