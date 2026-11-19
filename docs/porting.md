@@ -4,11 +4,11 @@
 
 所有命令都在仓库根目录下用 PowerShell 7 运行。
 
-## 版本对应（dsh-v0.2.2-rc.3-win7.1）
+## 版本对应（dsh-v0.2.2-rc.5-win7.1）
 
 | 组件 | 版本 | 固定在哪里 |
 |---|---|---|
-| DSH | 上游 tag `dsh-v0.2.2-rc.3` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.2-rc.3-win7` 上有 9 个提交：8 个 Win7 适配，加 1 个自动更新地址；tag 是 `dsh-v0.2.2-rc.3-win7.1` |
+| DSH | 上游 tag `dsh-v0.2.2-rc.5` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.2-rc.5-win7` 上有 9 个提交：8 个 Win7 适配，加 1 个自动更新地址；tag 是 `dsh-v0.2.2-rc.5-win7.1` |
 | Electron | 44.2.0：Chromium 152.0.7977.76（`src@0d89dfa2`），electron_node `71b8b174`（v24.20.0）。DSH 0.2.2 声明 `^44.7.0`（Chromium 152.0.7977.130），社区补丁目前只到 44.2.0，fork 里钉在 44.2.0 | `scripts/electron.gclient`、`scripts/electron-sync.cmd`；gn 参数在 `scripts/electron-release.gn`；版本钉在主仓库 `apps/desktop/package.json` |
 | pnpm | 11.28.5（随自带运行时分发） | 主仓库根目录 `package.json` 的 `packageManager` |
 | Electron Win7 补丁 | [e3kskoy7wqk/Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) `1086a0a7`（目录 `v44.2.0`），外加 `win7-fixes/electron` | `scripts/apply-electron-win7-patches.ps1` |
@@ -103,13 +103,13 @@
 
 ## 适配 DSH 新版本
 
-假设上游新 tag 是 `dsh-vX`，上一次适配的是 `dsh-v0.2.2-rc.3`：
+假设上游新 tag 是 `dsh-vX`，上一次适配的是 `dsh-v0.2.2-rc.5`：
 
 1. **迁移源码改动**
    ```powershell
    git -C deepseek-harness fetch origin --tags
    git -C deepseek-harness switch -c dsh-vX-win7 dsh-vX
-   git -C deepseek-harness cherry-pick dsh-v0.2.2-rc.3..dsh-v0.2.2-rc.3-win7
+   git -C deepseek-harness cherry-pick dsh-v0.2.2-rc.5..dsh-v0.2.2-rc.5-win7
    ```
    - 逐个解决冲突。9 个提交各管一件事，提交信息写了原因，可以据此判断上游是否已经换了做法。
    - 冲突解决完以后，先在主仓库里 `corepack pnpm install --frozen-lockfile`，再继续 cherry-pick。否则 pre-commit 钩子可能因为 `node_modules` 还是旧版本而报错（比如 "Provider metadata is stale"）。
