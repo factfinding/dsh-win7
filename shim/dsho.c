@@ -2,6 +2,10 @@
  * dsho.dll: Windows 8+ entry points that ONNX Runtime's onnxruntime.dll (sherpa-onnx-win-x64,
  * used by the experimental voice input) imports, for Windows 7.
  *
+ * scripts/build-win7-python-wheels.ps1 builds a second dsho.dll from this file for the onnxruntime
+ * Python wheel in the bundled Python (PyMuPDF's layout analysis): onnxruntime_pybind11_state.pyd and
+ * onnxruntime.dll there lack the same six functions; the forwarders are generated from their imports.
+ *
  * scripts/patch-imports.ps1 renames the DLL's kernel32.dll, dxgi.dll and api-ms-win-core-path-l1-1-0.dll
  * imports to dsho.dll (the name has to fit in "dxgi.dll"). The generated out/shim/dsho.def forwards
  * every other kernel32 function the DLL imports back to kernel32 (scripts/gen-forward-def.ps1) and

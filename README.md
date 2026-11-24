@@ -7,19 +7,19 @@
 | | |
 |---|---|
 | 适配的 DSH 版本 | 0.2.2-rc.5（上游 tag `dsh-v0.2.2-rc.5`） |
-| 当前发布 | [`dsh-v0.2.2-rc.5-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.5-win7.1) |
+| 当前发布 | [`dsh-v0.2.2-rc.5-win7.2`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.5-win7.2)（安装包版本号 0.2.2-rc.5.2，自带 Python 加了 PDF 库） |
 | DSH 源码改动 | [factfinding/deepseek-harness](https://github.com/factfinding/deepseek-harness/tree/dsh-v0.2.2-rc.5-win7) 的 `dsh-v0.2.2-rc.5-win7` 分支 |
-| 旧版本 | 0.2.2-rc.3：[`dsh-v0.2.2-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.3-win7.1)；0.2.2-rc.1：[`dsh-v0.2.2-rc.1-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.1-win7.1)；0.2.1-rc.5：[`dsh-v0.2.1-rc.5-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.5-win7.1)；0.2.1-rc.3：[`dsh-v0.2.1-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.3-win7.1)；0.2.1-rc.2：[`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1)；0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
+| 旧版本 | 0.2.2-rc.5 首次发布：[`dsh-v0.2.2-rc.5-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.5-win7.1)；0.2.2-rc.3：[`dsh-v0.2.2-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.3-win7.1)；0.2.2-rc.1：[`dsh-v0.2.2-rc.1-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.2-rc.1-win7.1)；0.2.1-rc.5：[`dsh-v0.2.1-rc.5-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.5-win7.1)；0.2.1-rc.3：[`dsh-v0.2.1-rc.3-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.3-win7.1)；0.2.1-rc.2：[`dsh-v0.2.1-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.1-rc.2-win7.1)；0.2.0-rc.2：[`dsh-v0.2.0-rc.2-win7.1`](https://github.com/factfinding/dsh-win7/releases/tag/dsh-v0.2.0-rc.2-win7.1) |
 
 ## 安装
 
 ### 系统要求
 
 - Windows 7 SP1 x64。32 位系统和没有 SP1 的 Win7 都不行。
-- 磁盘：程序约 1.3 GB。第一次使用时，自带的 Python/Node 运行时还会复制一份到用户目录，约 0.3 GB。
+- 磁盘：程序约 1.5 GB。第一次使用时，自带的 Python/Node 运行时还会复制一份到用户目录，约 0.4 GB。
 - 不需要另装 .NET、Python、Node.js、PowerShell 或 Office。DSH 自带：
   - PowerShell 7.2；
-  - Python 3.12，含 numpy、pandas、python-docx、python-pptx、openpyxl、Pillow、lxml 等；
+  - Python 3.12，含 numpy、pandas、python-docx、python-pptx、openpyxl、Pillow、lxml 等，以及处理 PDF 的 pypdf、pdfplumber、pdfminer.six、PyMuPDF；
   - Node.js 24 和 pnpm；
   - Office 文档转换。
 
@@ -63,7 +63,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 ### 安装 DSH
 
-1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.2-rc.5-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
+1. 从 [Releases](https://github.com/factfinding/dsh-win7/releases) 下载 `deepseek-harness-0.2.2-rc.5.2-win7-x64-unsigned.exe`，核对 Release 页面上的 SHA-256。
 2. 运行它。安装包没有签名，Win7 会提示"无法验证发布者"，点"运行"，然后点"立即安装"。
 3. 装好后开始菜单里会出现 DeepSeek Harness。
 
@@ -99,7 +99,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 ### 已知限制
 
 - 没装 KB2670838、在虚拟机里或通过远程桌面使用时，界面用软件渲染，功能不受影响，窗口很大时滚动可能没那么流畅。想确认 GPU 加速开没开，可以把本仓库 [`scripts`](scripts) 下的 `win7-gpu-check.cmd` 和 `win7-gpu-check.mjs` 下载到同一个文件夹，退出 DSH 后双击前者运行，最后一行会显示 ON 或 OFF。
-- 很多新版的二进制 Python 包（尤其是用 Rust 写的）在 Win7 上无法导入。给自带的 Python 加装包，请建一个继承自带包的虚拟环境，装完先 import 试一下：
+- 很多新版的二进制 Python 包（尤其是用 Rust 写的）在 Win7 上无法导入，自带的包是适配过的。不要用 pip 升级自带的包（比如 cryptography、onnxruntime），升级后拿到的是原版，在 Win7 上会导入失败。给自带的 Python 加装包，请建一个继承自带包的虚拟环境，装完先 import 试一下：
   ```
   "%USERPROFILE%\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe" -m venv --system-site-packages .venv
   ```
@@ -115,6 +115,7 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 | PowerShell | Win7 自带的 2.0 在沙箱里启动不了 | 自带 PowerShell 7.2.24 |
 | 搜索（ripgrep） | 官方 rg.exe 在 Win7 上崩溃 | 用 `x86_64-win7-windows-msvc` 目标编译 ripgrep 15.0.0 |
 | 看图（sharp）、Office 转换（LibreOffice Kit）、语音输入（ONNX Runtime） | 原生 DLL/EXE 导入了 Win8+ 函数 | 兼容层 DLL（[`shim/`](shim)），并改写这些文件的导入表 |
+| 自带 Python 的 PDF 库 | pdfminer.six、pdfplumber、pypdf 解密要用的 cryptography（Rust 编写），以及 PyMuPDF 版面分析用的 onnxruntime，导入了 Win8+ 函数；PyMuPDF 保存文件时用的 `fopen` 模式 `x`，Win7 的 UCRT 不支持，会直接结束进程 | 同样的兼容层 DLL，外加接管 `fopen` 的 dshmu.dll，放进这三个 wheel 并改写其中的导入表；加包的改动是 fork 里的 1 个提交 |
 | 终端 | node-pty 只支持 ConPTY | 自己写的 [`@dsh-win7/pty-winpty`](shim/pty-winpty)（winpty） |
 | DSH 自身 | Job 嵌套、打开方式列表、安装程序等 | 主仓库 fork 里的 8 个提交 |
 | 自动更新 | 未签名的包没有更新地址 | fork 里再加 1 个提交，让 Win7 版从本仓库的 GitHub Release 更新，DSH 的更新代码不改 |
@@ -130,4 +131,4 @@ cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b  vc_redist.x64.
 
 ## 许可证
 
-本仓库自己的代码以 [MIT](LICENSE) 许可证发布。DeepSeek Harness 以 MIT 许可证发布，版权归 DeepSeek 所有。安装包里的 Electron、Chromium、Node.js、Python、PowerShell、ripgrep、winpty、ONNX Runtime 等第三方组件，各自遵循自己的许可证。Electron 的 Win7 补丁来自 [e3kskoy7wqk/Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7)。
+本仓库自己的代码以 [MIT](LICENSE) 许可证发布。DeepSeek Harness 以 MIT 许可证发布，版权归 DeepSeek 所有。安装包里的 Electron、Chromium、Node.js、Python、PowerShell、ripgrep、winpty、ONNX Runtime 等第三方组件，各自遵循自己的许可证。自带 Python 里的 PyMuPDF 是 AGPL-3.0 许可证（Artifex 另有商业许可），原样随包分发，许可证文件在它的 `pymupdf-*.dist-info` 目录里，源码见 [PyMuPDF](https://github.com/pymupdf/PyMuPDF)。Electron 的 Win7 补丁来自 [e3kskoy7wqk/Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7)。

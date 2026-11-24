@@ -4,16 +4,17 @@
 
 所有命令都在仓库根目录下用 PowerShell 7 运行。
 
-## 版本对应（dsh-v0.2.2-rc.5-win7.1）
+## 版本对应（dsh-v0.2.2-rc.5-win7.2）
 
 | 组件 | 版本 | 固定在哪里 |
 |---|---|---|
-| DSH | 上游 tag `dsh-v0.2.2-rc.5` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.2-rc.5-win7` 上有 9 个提交：8 个 Win7 适配，加 1 个自动更新地址；tag 是 `dsh-v0.2.2-rc.5-win7.1` |
+| DSH | 上游 tag `dsh-v0.2.2-rc.5` | 子模块 `deepseek-harness`。fork 分支 `dsh-v0.2.2-rc.5-win7` 上有 10 个提交：8 个 Win7 适配、1 个自动更新地址、1 个自带 Python 的 PDF 库；tag 是 `dsh-v0.2.2-rc.5-win7.2`（安装包版本号 0.2.2-rc.5.2） |
 | Electron | 44.2.0：Chromium 152.0.7977.76（`src@0d89dfa2`），electron_node `71b8b174`（v24.20.0）。DSH 0.2.2 声明 `^44.7.0`（Chromium 152.0.7977.130），社区补丁目前只到 44.2.0，fork 里钉在 44.2.0 | `scripts/electron.gclient`、`scripts/electron-sync.cmd`；gn 参数在 `scripts/electron-release.gn`；版本钉在主仓库 `apps/desktop/package.json` |
 | pnpm | 11.28.5（随自带运行时分发） | 主仓库根目录 `package.json` 的 `packageManager` |
 | Electron Win7 补丁 | [e3kskoy7wqk/Electron-for-windows-7](https://github.com/e3kskoy7wqk/Electron-for-windows-7) `1086a0a7`（目录 `v44.2.0`），外加 `win7-fixes/electron` | `scripts/apply-electron-win7-patches.ps1` |
 | 自带 Node | 24.21.0，外加 `win7-fixes/node/v24.21.0` 的 7 个补丁 | 主仓库 `scripts/primary-runtime/lock.json` 里的 `nodeSha256` |
 | 自带 Python | PythonVista 3.12.14 NuGet 包 | `lock.json` 里的 `pythonNupkg` |
+| 自带 Python 的 PDF 库（只加在 win-x64） | pypdf 7.1.1、pdfplumber 0.11.10、pdfminer.six 20260107、PyMuPDF 2.1 及其依赖，共 19 个；其中 cryptography 50.0.2、onnxruntime 1.32.0 和 PyMuPDF 2.1 是带兼容层的重打包 | `lock.json` 里 `targets.win-x64` 的 `wheels` 和 `pythonPackages`；带 `win7Shim` 的两项由 `scripts/build-win7-python-wheels.ps1` 生成 |
 | PowerShell | 7.2.24 win-x64 zip（sha256 `a1ccb6d8ad52f917470a136c3752af4465f261bcbe570cf44f52aa69ae6e867e`） | `out\pwsh\*.sha256` |
 | ripgrep | 15.0.0（`@vscode/ripgrep` 1.18.0 带的版本） | `scripts/build-ripgrep.ps1` |
 | winpty | 0.4.3（`winpty-0.4.3-msvc2015.zip`） | `scripts/build-pty-winpty.ps1` |
@@ -65,7 +66,10 @@
 5. **PowerShell：** 下载 [PowerShell 7.2.24](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) 的 `PowerShell-7.2.24-win-x64.zip`，放到 `out\pwsh\`。旁边建一个同名 `.sha256` 文件，里面只写哈希值。
 6. **参考 node_modules：** 用官方 Node 在 `out\host-web-0.2.2-rc.3\` 里运行 `npm install --ignore-scripts @deepseek-ai/dsh@0.2.2-rc.3`。覆盖层以这些文件为原件，记下它们的 sha256，并读出要固定的版本。
 7. **覆盖层：** 运行 `scripts\build-win7-overlay.ps1 -Reference out\host-web-0.2.2-rc.3\node_modules`，生成 `out\win7-runtime-overlay\`。兼容层 DLL 会在这一步编译。
-8. **打包：**
+8. **自带 Python 的重打包 wheel：** 运行 `scripts\build-win7-python-wheels.ps1`，生成 `out\win7-python-wheels\`。它从 PyPI 下载 cryptography、onnxruntime 和 PyMuPDF 的原版 wheel，改写其中原生文件的导入表、放进兼容层 DLL（dshw7；按 onnxruntime 的导入生成的 dsho；dshmu），再重新打包，并更新 wheel 里 `RECORD` 记录的哈希。PyMuPDF 不缺函数，缺的是功能：MuPDF 用 `fopen(..., "wb+x")` 新建文件，Win7 的 UCRT（KB2999226，10.0.10240）不认识 `x`，直接以 0xC0000417 结束进程，`Document.save(路径)` 一调用 Python 就退出。静态导入检查发现不了这类问题，这是在虚拟机里实际运行时发现的。
+   - 兼容层用 `/Brepro` 编译，同样的源码和工具链会得到逐字节相同的 wheel。打包时 `prepare.ts` 按 `lock.json` 的 sha256 校验，对不上（比如换了 VS 版本）就把 `lock.json` 里带 `win7Shim` 那几项的 sha256 改成 `out\win7-python-wheels\*.whl.sha256` 里的值。
+   - 没有设 `DSH_WIN7_PYTHON_WHEELS` 时，准备 primary-runtime 会直接报错，不会用 PyPI 上的原版代替。
+9. **打包：**
    - 先建 `deepseek-harness\apps\desktop\.env.windows`：
      ```
      DSH_DESKTOP_APP_ID=local.dsh-win7.harness
@@ -111,7 +115,7 @@
    git -C deepseek-harness switch -c dsh-vX-win7 dsh-vX
    git -C deepseek-harness cherry-pick dsh-v0.2.2-rc.5..dsh-v0.2.2-rc.5-win7
    ```
-   - 逐个解决冲突。9 个提交各管一件事，提交信息写了原因，可以据此判断上游是否已经换了做法。
+   - 逐个解决冲突。10 个提交各管一件事，提交信息写了原因，可以据此判断上游是否已经换了做法。
    - 冲突解决完以后，先在主仓库里 `corepack pnpm install --frozen-lockfile`，再继续 cherry-pick。否则 pre-commit 钩子可能因为 `node_modules` 还是旧版本而报错（比如 "Provider metadata is stale"）。
    - 如果某个包不再声明某个依赖，pnpm 不会删掉它在这个包 `node_modules\.bin` 里留下的启动脚本。等那个依赖的旧版本被清掉，打包就会报 `Cannot find module …\.pnpm\<包>@<旧版本>\…`（0.2.1-rc.3 时 `apps/desktop` 的 tsx 就是这样）。找出指向不存在的 `.pnpm` 目录的启动脚本，删掉就行。
    - 自动合并的地方也要逐个核对。0.2.1 时上游重构过 Node 下载和打包脚本，Win7 的改动要按新结构重新接入。
@@ -119,6 +123,13 @@
    - **Electron：** `apps/desktop/package.json` 不再是 44.2.0 时，要换成 Electron-for-windows-7 对应版本的补丁，重新编译。必要时更新 `win7-fixes/electron` 和 `electron-release.gn`。
    - **Node：** `scripts/primary-runtime/lock.json` 的 Node 版本变了时，在新版本上重新打 `win7-fixes/node` 的补丁，改好后导出到 `win7-fixes/node/<新版本>/`，重新编译并更新 `nodeSha256`。
    - **Python：** 版本变了时，换成 PythonVista 对应版本，更新 `pythonNupkg`。
+   - **Python 的 PDF 库：** 上游 `lock.json` 的共用 `pythonPackages` 变了（比如 numpy、Pillow 升级）时，把新的共用版本写成约束文件（每行 `名字==版本`），用自带的 Python 重新解析 win-x64 的 PDF 库，再按报告更新 `targets.win-x64` 的 `wheels` 和 `pythonPackages`。PyMuPDF 2.x 和 cryptography 新版没有 mac-x64 的 wheel，所以 PDF 库只加在 win-x64：
+     ```powershell
+     <python.exe> -I -m pip install --dry-run --report pdf.json --only-binary=:all: --platform win_amd64 --python-version 3.12 `
+       --implementation cp --abi cp312 --target <空目录> -c bundled.txt pypdf pdfplumber pdfminer.six pymupdf
+     ```
+     - cryptography、onnxruntime 或 PyMuPDF 的版本变了时，改 `build-win7-python-wheels.ps1` 里的 URL 和 sha256 再运行。兼容层的转发表按新文件的导入自动生成，但要先对新 wheel 跑 `check-win7-rtm-imports.ps1`，看缺的函数是否还是兼容层实现的那几个。
+     - `build-win7-python-wheels.ps1` 只处理这三个包。其他新增或升级的二进制包也要先做静态导入检查，再把 `out\primary-runtime-*` 里的 Python 拷进虚拟机，运行 `scripts/primary-runtime/smoke.py`（它会写、读、解密 PDF）。
    - **pnpm：** 不要升级到 pnpm 12，它的原生程序在 Win7 上启动失败。
    - **原生包：** 按新版本建参考目录 `out\host-web-<版本>`，和覆盖层清单里记录的原件 sha256 逐个比对。都相同时，现有覆盖层可以原样复用（0.2.1 就是这样）；有变化时再用 `-Reference` 指向新目录运行 `build-win7-overlay.ps1`，按新文件重新生成兼容层的导出表，并复查缺哪些函数。打包时也会做同样的 sha256 检查，原件对不上就直接失败，不会悄悄换错文件。
      - 原生文件换了名字或换了构建方式时，覆盖层脚本也要跟着改。0.2.2-rc.3 的 LibreOffice Kit 0.2.3 把引擎从 `libreoffice-kit.exe` 换成了 `dsoffice.exe`，还开始从 Win8 才有的 API Set 名（如 `api-ms-win-core-version-l1-1-0.dll`）导入。先对参考目录里的新文件跑 `check-win7-rtm-imports.ps1`：缺的若只是 API Set 名、函数本身 Win7 有，就把这个名字也改成兼容层，用 `gen-forward-def.ps1 -ForwardTo` 转发到 Win7 上的 DLL，并把那个 DLL 的 `.lib` 加进 `build-shim.cmd`；Win7 真没有的函数在兼容层里实现。

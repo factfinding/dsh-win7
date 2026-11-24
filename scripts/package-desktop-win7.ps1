@@ -1,6 +1,8 @@
 # Packages the DeepSeek Harness desktop app for Windows 7 x64 (unsigned) from deepseek-harness\.
 # Inputs, all built in this directory (see docs/porting.md):
 #   out\node-v24.21.0-win-x64.zip            Win7 node.exe for the primary runtime (scripts\build-node.cmd)
+#   out\win7-python-wheels\                  cryptography, onnxruntime and pymupdf wheels with shim DLLs for the primary runtime's
+#                                            Python (scripts\build-win7-python-wheels.ps1)
 #   out\win7-runtime-overlay\                rg, libvips, LibreOffice Kit, winpty + version pins (scripts\build-win7-overlay.ps1)
 #   out\pwsh\PowerShell-7.2.24-win-x64.zip   PowerShell 7.2 for the Host PATH on Win7, with its .sha256
 #   out\electron-v44.2.0-win32-x64.zip       Win7-patched Electron (scripts\electron-build.cmd)
@@ -14,6 +16,7 @@ $root = Split-Path $PSScriptRoot
 $out = Join-Path $root 'out'
 $inputs = @{
   DSH_PRIMARY_RUNTIME_NODE_ARCHIVE = Join-Path $out 'node-v24.21.0-win-x64.zip'
+  DSH_WIN7_PYTHON_WHEELS = Join-Path $out 'win7-python-wheels'
   DSH_WIN7_RUNTIME_OVERLAY = Join-Path $out 'win7-runtime-overlay'
   DSH_WIN7_PWSH_ARCHIVE = Join-Path $out 'pwsh\PowerShell-7.2.24-win-x64.zip'
   DSH_WIN7_ELECTRON_ARCHIVE = Join-Path $out 'electron-v44.2.0-win32-x64.zip'
